@@ -23,7 +23,7 @@ import frc.robot.libraries.NetworkTableEntryGroup;
 
 import static frc.robot.Constants.*;
 
-public class DrivetrainSubsystem extends SubsystemBase {
+public class Drivetrain extends SubsystemBase {
 
   private ShuffleboardTab kSwerveTab = Shuffleboard.getTab("SwerveControl");
   NetworkTableEntryGroup EncoderOffsetSet = new NetworkTableEntryGroup(kSwerveTab, "EOffset", Constants.MagOffset);
@@ -71,7 +71,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * Each array is alligned in the format:
    *  { l1 , r1 , l2 , r2}
    */
-  public DrivetrainSubsystem() {
+  public Drivetrain() {
 
     for (int i = 0; i < 4; i++) {
       a_mTencoder[i].setPosition(0);

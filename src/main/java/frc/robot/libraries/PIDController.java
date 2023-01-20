@@ -3,12 +3,6 @@ import edu.wpi.first.wpilibj.Timer;
 
 public class PIDController {
     
-    
-    /**
-     * @author Nikolai (AdmiralTryhard)
-     */
-    
-    
     public double pvalue;
     public double ivalue;
     public double dvalue;

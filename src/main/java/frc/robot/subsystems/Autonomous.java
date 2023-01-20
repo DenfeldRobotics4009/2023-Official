@@ -10,12 +10,12 @@ import frc.robot.libraries.PIDController;
 /**
  * Among us lore easter egg!!!1!11!!!!1!
  */
-public class AutonomousSubsystem extends SubsystemBase {
-  DrivetrainSubsystem m_driveTrain;
+public class Autonomous extends SubsystemBase {
+  Drivetrain m_driveTrain;
   // ApriltagServer m_cameraServer;
   /** Creates a new Autonomous. */
-  public AutonomousSubsystem(
-    DrivetrainSubsystem m_DrivetrainSubsystem
+  public Autonomous(
+    Drivetrain m_DrivetrainSubsystem
     // ,ApriltagServer m_ApriltagServer
   ) {
     m_driveTrain = m_DrivetrainSubsystem;
@@ -23,8 +23,12 @@ public class AutonomousSubsystem extends SubsystemBase {
   }
 
   double m_speed, m_thetaDegreesDelta, m_goalMeanDriveRotations, meanDriveRotations;
+  // TODO Tune!
   PIDController driveController = new PIDController(0.1, 0, 0, 0);
 
+  /**
+   * Updates meanDriveRotations via sum of quarter of each drive motor
+   */
   void updateMeanDriveRotations() {
     meanDriveRotations = 0;
     for (int i = 0; i < 4; i++) {
