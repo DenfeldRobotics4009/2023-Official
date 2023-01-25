@@ -21,28 +21,77 @@ public class ReactiveCANSparkMax {
     
     double recursiveError = 0;
 
-    double recursiveError_Max = 0.5;
-    double P = 0, I = 0, D = 0;
+    // TODO * Tune default values, make them values ment for drive? obviously operating an arm
+    // TODO * with antipush will take MUCH lower values.
+    double recursiveErrorGrowthMax = 0.004; // 0.05 / 12 heehoo
+    double recursiveErrorClampMax = 1;
+    double P = 2, I = 0, D = 0.8;
+
+    PIDController pid = new PIDController(P, I, D, 0);
 
     /**
-     * Creates a new CANSpark max framwork to automatically use antipush systems
-     * @param Motor A new CANSparkMax with an encoder on the motor
+     * Creates a new CANSpark max framwork to automatically use antipush systems.
+     * @param Motor A new CANSparkMax with an encoder on the motor.
+     * @implNote PID values are tuned (approximately) for drive motors by default.
      */
-    public ReactiveCANSparkMax(
-        CANSparkMax Motor,
-        double RecursiveMax, 
-        double P, double I, double D
-    ) {
+    public ReactiveCANSparkMax(CANSparkMax Motor) {
         m_Motor = Motor;
         m_Encoder = Motor.getEncoder();
+        // PID input is the error, rather than speeds. Thus the goal
+        // error must always be zero!
+        pid.setTarget(0);
     }
 
     /**
-     * 
-     * @param speed
+     * Configures the embedded PID tuner used for how much
+     * the recursiveError grows or decreases every frame of error.
+     * @param P default 2
+     * @param I default 0 
+     * @param D default 0.8
+     * @param maximum default 0.004
+     * @return self, for chaining
+     */
+    public ReactiveCANSparkMax setPID(double P, double I, double D) {
+        pid.kP = P; 
+        pid.kI = I; 
+        pid.kD = D;
+
+        return this;
+    }
+
+    /**
+     * Configures the maximum growth and clamp values.
+     * @param RecursiveErrorClampMax default 1
+     * @param RecursiveErrorGrowthMax default 0.004
+     * @return self, for chaining
+     */
+    public ReactiveCANSparkMax setMaximums(double RecursiveErrorClampMax, double RecursiveErrorGrowthMax) {
+        recursiveErrorClampMax = RecursiveErrorClampMax;
+        recursiveErrorGrowthMax = RecursiveErrorGrowthMax;
+
+        return this;
+    }
+
+    /**
+     * Sets the motor in with anti push function
+     * @param speed The goal speed of the motor from -1 to 1
      */
     public void set(double speed) {
-        
+        m_Motor.set(calculateErrorOffset(speed));
+    }
+
+    /**
+     * Operates as the anti-push set function, though with a toggle ability.
+     * Allowing antipush to be toggle via a button or trigger more easily.
+     * @param speed The goal speed of the motor from -1 to 1
+     * @param normalFunction Will act as the standard CANSparkMax set function when true
+     */
+    public void set(double speed, boolean normalFunction) {
+        if (normalFunction) {
+            m_Motor.set(speed);
+        } else {
+            set(speed);
+        }
     }
 
     /**
@@ -54,20 +103,33 @@ public class ReactiveCANSparkMax {
         set(0);
     }
 
-    double calculateErrorOffset(int i, double S) {
-        a_dpid[i].setTarget(0);
-    
-        double setSpeed = S;
-        double idealRPM = S * MAX_NEO_RPM;
-        double E = a_mencoder[i].getVelocity() - idealRPM;
-    
-        DriveError.Entries[i].setDouble(E);
-    
-        a_dpid[i].setInput(E);
-    
-        recursiveError[i] += a_dpid[i].calculate(admax, admin); 
-        recursiveError[i] = clamp(-MAX_VOLTAGE, MAX_VOLTAGE, recursiveError[i]);
-        return clamp(-MAX_VOLTAGE, MAX_VOLTAGE, setSpeed + recursiveError[i] );
-      }
+    /**
+     * @param S drive speed input
+     * @return the sum of the drive input, and the recusive error value
+     */
+    double calculateErrorOffset(double S) {
+        double idealRPM = S * Constants.MAX_NEO_RPM;
+        // Distance of real vilocity from wanted vilocity
+        double E = m_Encoder.getVelocity() - idealRPM;
+        // Communicate to PID loop
+        pid.setInput(E);
+        // Scale pid output via recursiveError_Max and add to current recursive error
+        recursiveError += pid.calculate(recursiveErrorGrowthMax, -recursiveErrorGrowthMax); 
+        // Clamp recursive value for safety, though this still allows max power
+        recursiveError = clamp(-1, 1, recursiveError);
+        // Clamp the sum of the drive speed and recursive value
+        return clamp(-1, 1, S + recursiveError);
+    }
 
+    /**
+     * @param min
+     * @param max
+     * @param input
+     * @return min if input < min, max if input > max
+     */
+    public static double clamp(double min, double max, double input) {
+        if (input > max) {return max;}
+        if (input < min) {return min;}
+        return input;
+    }
 }

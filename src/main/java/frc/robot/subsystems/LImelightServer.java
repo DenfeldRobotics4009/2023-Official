@@ -4,20 +4,11 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
-import frc.robot.libraries.ReactiveCANSparkMax;
 
-public class Arm extends SubsystemBase {
-
-  ReactiveCANSparkMax m_joint = new ReactiveCANSparkMax(new CANSparkMax(Constants.JointM_, MotorType.kBrushless));
-  
-
-  /** Creates a new Arm. */
-  public Arm() {}
+public class LImelightServer extends SubsystemBase {
+  /** Creates a new LImelightServer. */
+  public LImelightServer() {}
 
   @Override
   public void periodic() {

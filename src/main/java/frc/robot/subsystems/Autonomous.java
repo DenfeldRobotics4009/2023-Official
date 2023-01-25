@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import com.kauailabs.navx.frc.AHRS;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.libraries.PIDController;
 
@@ -20,11 +22,19 @@ public class Autonomous extends SubsystemBase {
   ) {
     m_driveTrain = m_DrivetrainSubsystem;
     // m_cameraServer = m_ApriltagServer;
+
+    turnController.setTarget(0);
   }
 
-  double m_speed, m_thetaDegreesDelta, m_goalMeanDriveRotations, meanDriveRotations;
+  double m_thetaDegreesDelta, m_goalMeanDriveRotations, meanDriveRotations;
+  double m_thetaDegreesTurnDelta;
+
   // TODO Tune!
-  PIDController driveController = new PIDController(0.1, 0, 0, 0);
+  PIDController 
+    driveController = new PIDController(0.1, 0, 0, 0), 
+    turnController = new PIDController(0.1, 0, 0, 0);
+
+  public static AHRS navxGyro = new AHRS(); // gyro
 
   /**
    * Updates meanDriveRotations via sum of quarter of each drive motor
@@ -35,31 +45,78 @@ public class Autonomous extends SubsystemBase {
       meanDriveRotations += m_driveTrain.a_mencoder[i].getPosition() / 4;
     }
   }
+
+  /**
+   * Sets the goal values for the turn function
+   * 
+   * @param thetaDegreesDelta degrees to turn relative to current direction
+   * @param speed The speed (from -1 to 1) to travel
+   * 
+   * @returns self for chaining
+   */ 
+  public Autonomous setTurnGoal(double thetaDegreesDelta) {
+    m_thetaDegreesTurnDelta = thetaDegreesDelta;
+
+    return this;
+  }
+
+  /**
+   * @param distanceTolerance
+   * @param speed
+   * @return jsZ value to turn
+   */
+  double turn(double distanceTolerance, double speed) {
+
+    turnController.setInput(
+      calcDistCorrection(m_thetaDegreesTurnDelta, navxGyro.getAngle())
+    );
+
+    return turnController.calculate(speed, -speed);
+  }
+
+  /**
+   * Set PIDController goal to zero
+   * @param target PID goal
+   * @param pos PID input
+   * @return target relative to pos on a circle
+   */
+  double calcDistCorrection(double target, double pos) {
+    if (Math.abs(target + (360) - pos) < Math.abs(target - pos)) {
+      return target + (360) - pos;
+    } else if (Math.abs(target - (360) - pos) < Math.abs(target - pos)) {
+      return target - (360) - pos;
+    } else {return target - pos;}
+  }
+
   /**
    * Sets the goal values for the drive function.
    * 
-   * @param thetaDegreesDelta The direction to travel in degrees from the current direction
+   * @param thetaDegreesDelta The direction to travel in degrees from the starting direction
    * @param driveRotationsDelta The number of motor rotations to travel
    * @param speed The speed (from -1 to 1) to travel
+   * 
+   * @returns self for chaining
    */
-  public void setDriveGoal(double thetaDegreesDelta, double driveRotationsDelta, double speed) {
+  public Autonomous setDriveGoal(double thetaDegreesDelta, double driveRotationsDelta) {
     updateMeanDriveRotations();
 
     m_goalMeanDriveRotations = meanDriveRotations + driveRotationsDelta;
 
     m_thetaDegreesDelta = thetaDegreesDelta;
-    m_speed = speed;
+
+    return this;
   }
 
   /**
-   * Called periodically instead of DriveTrainSubsystem.drive to allow for 
-   * autonomous control.
+   * Drives the robot via the drivetrain subsystem based upon
+   * the previously set values.
    * 
-   * @param distanceToTolerance the tolerance of driveRotationsDelta
-   * 
-   * @returns true if traveled distance is within thew goal by the distance tolerance
+   * @param distanceTolerance PID tolerance of drive controller
+   * @param speed PID maximum speed
+   * @param turnSpeed PID maximum speed
+   * @param turnTolerance PID tolerance of drive controller
    */
-  public boolean drive(double distanceTolerance) {
+  public void drive(double distanceTolerance, double speed, double turnSpeed, double turnTolerance) {
     updateMeanDriveRotations();
 
     // Update PID controller values periodically
@@ -68,18 +125,17 @@ public class Autonomous extends SubsystemBase {
 
     // Scale trig function speeds according to pid outputs, set max to the defined speed.
     // This requires functional PID tuning!
-    double pidSpeed = driveController.calculate(-m_speed, m_speed);
+    double pidSpeed = driveController.calculate(-speed, speed);
 
-    // TODO Ignore jsZ
+    double emulated_jsZ = 0;//turn(turnTolerance, turnSpeed);
+
     /**
      * The issue with turning while were driving is that the jsX and jsY values
      * are based on our direction. This swerve bot is NOT feild oriented.
      */
     double emulated_jsX = pidSpeed*Math.cos(Math.toRadians(m_thetaDegreesDelta));
     double emulated_jsY = pidSpeed*Math.sin(Math.toRadians(m_thetaDegreesDelta));
-    m_driveTrain.drive(0, emulated_jsX, emulated_jsY);
-
-    return false;
+    m_driveTrain.drive(emulated_jsZ, emulated_jsX, emulated_jsY);
   }
 
   @Override

@@ -11,7 +11,7 @@ public class NetworkTableEntryGroup {
       build(tab, title, defaults);
     }
     public NetworkTableEntryGroup(ShuffleboardTab tab, String title, double[] defaultSet) {
-        build(tab, title, defaultSet);
+      build(tab, title, defaultSet);
     }
 
     void build(ShuffleboardTab tab, String title, double[] defaultSet) {

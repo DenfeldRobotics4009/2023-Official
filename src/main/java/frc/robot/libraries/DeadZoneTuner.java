@@ -5,8 +5,6 @@ public class DeadZoneTuner{
 
     /**
      * 
-     * @author Nikolai
-     * 
      * This should handle customizations (especially for deadzones) that one may want to use on items that have a scale range
      * This should also be able to handle any additional scaling outside of the deadzones.
      */

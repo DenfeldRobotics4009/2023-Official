@@ -31,15 +31,15 @@ public class DefaultDriveCommand extends CommandBase {
         m_drivetrainSubsystem.drive(
             DeadZoneTuner.adjustForDeadzone(
                 m_rotationSupplier.getAsDouble(), 
-                0.01 * Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+                0.15 * Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
                 false),
             DeadZoneTuner.adjustForDeadzone(
                 m_translationXSupplier.getAsDouble(), 
-                0.01 * Constants.MAX_VELOCITY_METERS_PER_SECOND, 
+                0.1 * Constants.MAX_VELOCITY_METERS_PER_SECOND, 
                 false),
             DeadZoneTuner.adjustForDeadzone(
                 m_translationYSupplier.getAsDouble(), 
-                0.01 * Constants.MAX_VELOCITY_METERS_PER_SECOND, 
+                0.1 * Constants.MAX_VELOCITY_METERS_PER_SECOND, 
                 false)
         );
     }

@@ -84,10 +84,12 @@ public final class Constants {
     public static final int R2SM_ = 34; 
     public static final int R2SE_ = 3;
 
-    public static final double L1SMagnetOffset = 0;
-    public static final double R1SMagnetOffset = -45;
-    public static final double L2SMagnetOffset = 15;
-    public static final double R2SMagnetOffset = 0;
+    public static final double L1SMagnetOffset = -75;
+    public static final double R1SMagnetOffset = 5;
+    public static final double L2SMagnetOffset = 85;
+    public static final double R2SMagnetOffset = 230;
+
+    public static final int JointM_ = 0;
 
     public static final double[] MagOffset = {
         L1SMagnetOffset, R1SMagnetOffset, L2SMagnetOffset, R2SMagnetOffset

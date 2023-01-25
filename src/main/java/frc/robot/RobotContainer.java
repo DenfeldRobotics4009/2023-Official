@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+// glory to felix the helix
+
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
@@ -24,7 +26,7 @@ import frc.robot.subsystems.Drivetrain;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final Drivetrain m_drivetrainSubsystem = new Drivetrain();
-  private final ApriltagServer m_aprilTagServer = new ApriltagServer();
+  //private final ApriltagServer m_aprilTagServer = new ApriltagServer();
   private final Autonomous m_autoSubsystem = new Autonomous(m_drivetrainSubsystem);
 
   private final Joystick m_jsDriver = new Joystick(0);
@@ -59,10 +61,16 @@ public class RobotContainer {
   private void configureButtonBindings() {
     JoystickButton d1 = new JoystickButton(m_jsDriver, 0);
     JoystickButton d2 = new JoystickButton(m_jsDriver, 2);
+    JoystickButton d3 = new JoystickButton(m_jsDriver, 3);
     JoystickButton d4 = new JoystickButton(m_jsDriver, 4);
+    JoystickButton d5 = new JoystickButton(m_jsDriver, 5);
+    JoystickButton d6 = new JoystickButton(m_jsDriver, 6);
+    JoystickButton d7 = new JoystickButton(m_jsDriver, 7);
+    JoystickButton d8 = new JoystickButton(m_jsDriver, 8);
     JoystickButton d9 = new JoystickButton(m_jsDriver, 9);
     JoystickButton d10 = new JoystickButton(m_jsDriver, 10);
     JoystickButton d11 = new JoystickButton(m_jsDriver, 11);
+    JoystickButton d12 = new JoystickButton(m_jsDriver, 12);
 
     JoystickButton o1 = new JoystickButton(m_jsOperator, 1);
     JoystickButton o2 = new JoystickButton(m_jsOperator, 2);

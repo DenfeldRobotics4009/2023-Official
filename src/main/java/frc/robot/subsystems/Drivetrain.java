@@ -23,6 +23,8 @@ import frc.robot.libraries.NetworkTableEntryGroup;
 
 import static frc.robot.Constants.*;
 
+// OwO <- thats an owo not an uwu - Luke
+
 public class Drivetrain extends SubsystemBase {
 
   private ShuffleboardTab kSwerveTab = Shuffleboard.getTab("SwerveControl");
@@ -91,7 +93,32 @@ public class Drivetrain extends SubsystemBase {
    * @param jsx Joystick left/right input
    * @param jsy Joystick forward/backward input
    */
-  public void drive(double jsz, double jsx, double jsy) {jsZ = jsz; jsX = jsx; jsY = jsy;}
+  public void drive(double jsz, double jsx, double jsy) {
+    jsZ = jsz; jsX = jsx; jsY = jsy;
+  }
+
+  /**
+   * Updates subsystem drive kinematics information.
+   * Should be ran periodcally. Otherwise robot will
+   * continue moving in last direction
+   * 
+   * This function converts the feild oriented controls into relative drive
+   * 
+   * TODO Test
+   * 
+   * @param jsz
+   * @param jsx
+   * @param jsy
+   */
+  public void feildOrientedDrive(double jsz, double jsx, double jsy) {
+    double gyroAngle = Autonomous.navxGyro.getAngle();
+    // (xcos(theta) - ysin(theta) , ycos(theta) + xsin(theta)) // Relative point of rad theta
+    drive(
+      jsz, // Black magic math
+      jsX * Math.cos(gyroAngle) - jsY * Math.sin(gyroAngle),
+      jsY * Math.cos(gyroAngle) + jsX * Math.sin(gyroAngle)
+    );
+  }
 
   void p_drive(SwerveModuleState... states) {
     for (int i = 0; i < states.length; i++) {
