@@ -13,9 +13,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.DefaultDriveCommand;
-import frc.robot.subsystems.ApriltagServer;
+import frc.robot.commands.TogglePipeline;
 import frc.robot.subsystems.Autonomous;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.LimelightServer;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -26,8 +27,10 @@ import frc.robot.subsystems.Drivetrain;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final Drivetrain m_drivetrainSubsystem = new Drivetrain();
-  //private final ApriltagServer m_aprilTagServer = new ApriltagServer();
+
   private final Autonomous m_autoSubsystem = new Autonomous(m_drivetrainSubsystem);
+
+  private final LimelightServer m_limeLight = new LimelightServer();
 
   private final Joystick m_jsDriver = new Joystick(0);
   private final Joystick m_jsOperator = new Joystick(1);
@@ -59,7 +62,7 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    JoystickButton d1 = new JoystickButton(m_jsDriver, 0);
+    JoystickButton d1 = new JoystickButton(m_jsDriver, 1);
     JoystickButton d2 = new JoystickButton(m_jsDriver, 2);
     JoystickButton d3 = new JoystickButton(m_jsDriver, 3);
     JoystickButton d4 = new JoystickButton(m_jsDriver, 4);
@@ -83,6 +86,8 @@ public class RobotContainer {
     JoystickButton o9 = new JoystickButton(m_jsOperator, 9);
     JoystickButton o11 = new JoystickButton(m_jsOperator, 11);
     JoystickButton o12 = new JoystickButton(m_jsOperator, 12);
+
+    d1.onTrue(new TogglePipeline());
   }
 
   /**

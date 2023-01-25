@@ -6,6 +6,9 @@ package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.libraries.PIDController;
 
@@ -14,17 +17,6 @@ import frc.robot.libraries.PIDController;
  */
 public class Autonomous extends SubsystemBase {
   Drivetrain m_driveTrain;
-  // ApriltagServer m_cameraServer;
-  /** Creates a new Autonomous. */
-  public Autonomous(
-    Drivetrain m_DrivetrainSubsystem
-    // ,ApriltagServer m_ApriltagServer
-  ) {
-    m_driveTrain = m_DrivetrainSubsystem;
-    // m_cameraServer = m_ApriltagServer;
-
-    turnController.setTarget(0);
-  }
 
   double m_thetaDegreesDelta, m_goalMeanDriveRotations, meanDriveRotations;
   double m_thetaDegreesTurnDelta;
@@ -34,7 +26,16 @@ public class Autonomous extends SubsystemBase {
     driveController = new PIDController(0.1, 0, 0, 0), 
     turnController = new PIDController(0.1, 0, 0, 0);
 
-  public static AHRS navxGyro = new AHRS(); // gyro
+  public static AHRS navxGyro = new AHRS();
+
+  /** 
+   * Creates a new Autonomous. 
+  */
+  public Autonomous(Drivetrain m_DrivetrainSubsystem) {
+    m_driveTrain = m_DrivetrainSubsystem;
+
+    turnController.setTarget(0);
+  }
 
   /**
    * Updates meanDriveRotations via sum of quarter of each drive motor
@@ -44,6 +45,7 @@ public class Autonomous extends SubsystemBase {
     for (int i = 0; i < 4; i++) {
       meanDriveRotations += m_driveTrain.a_mencoder[i].getPosition() / 4;
     }
+
   }
 
   /**

@@ -4,11 +4,46 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class LImelightServer extends SubsystemBase {
+public class LimelightServer extends SubsystemBase {
+
+  public static NetworkTable limeLight = NetworkTableInstance.getDefault().getTable("limelight");
+
+  public static NetworkTableEntry 
+    tx = limeLight.getEntry("tx"), // Horizontal Offset From Crosshair To Target (-29.8 to 29.8 degrees)
+    ty = limeLight.getEntry("ty"), // Vertical Offset From Crosshair To Target (-24.85 to 24.85 degrees)
+    tv = limeLight.getEntry("tv"), // Whether the limelight has any valid targets (0 or 1)
+    /**
+     * ledMode	Sets limelight’s LED state
+     * 0	use the LED Mode set in the current pipeline
+     * 1	force off
+     * 2	force blink
+     * 3	force on
+     */
+    LedMode = limeLight.getEntry("ledMode"),
+    /**
+     * camMode	Sets limelight’s operation mode
+     * 0	Vision processor
+     * 1	Driver Camera (Increases exposure, disables vision processing)
+     */
+    CamMode = limeLight.getEntry("camMode"),
+
+    /**
+     * Default pipeline is 0
+     * 0 - Cube
+     * 1 - Cone
+     */
+    Pipeline = limeLight.getEntry("pipeline");
+    
   /** Creates a new LImelightServer. */
-  public LImelightServer() {}
+  public LimelightServer() {
+    LedMode.setNumber(1);
+    // Use defaults configured in the limelight webpage
+  }
 
   @Override
   public void periodic() {

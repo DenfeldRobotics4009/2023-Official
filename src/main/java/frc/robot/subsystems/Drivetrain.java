@@ -188,7 +188,7 @@ public class Drivetrain extends SubsystemBase {
     max = ScaleToBattery(1);
     min = -max;
     // Display values
-    SmartDashboard.putNumber("MaxTurning", max);
+    SmartDashboard.putNumber("Max Turning Power", max);
     SmartDashboard.putNumber("Voltage", RobotController.getBatteryVoltage());
     // Pull wheel values from kinematics object
     SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(new ChassisSpeeds(jsX, jsY, jsZ));
