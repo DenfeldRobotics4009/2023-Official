@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.TogglePipeline;
+import frc.robot.commands.TurnTowardsTarget;
 import frc.robot.subsystems.Autonomous;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.LimelightServer;
@@ -88,6 +89,13 @@ public class RobotContainer {
     JoystickButton o12 = new JoystickButton(m_jsOperator, 12);
 
     d1.onTrue(new TogglePipeline());
+    d2.whileTrue(
+      new TurnTowardsTarget(
+        m_autoSubsystem, m_drivetrainSubsystem, 
+        () -> m_jsDriver.getX() * Constants.MAX_VELOCITY_METERS_PER_SECOND,
+        () -> m_jsDriver.getY() * Constants.MAX_VELOCITY_METERS_PER_SECOND
+      )
+    );
   }
 
   /**

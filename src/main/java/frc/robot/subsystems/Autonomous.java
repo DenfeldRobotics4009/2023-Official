@@ -9,6 +9,7 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.libraries.PIDController;
 
@@ -74,6 +75,27 @@ public class Autonomous extends SubsystemBase {
     );
 
     return turnController.calculate(speed, -speed);
+  }
+
+  /**
+   * Turns the robot towards the target based upon the given error
+   * @param Error Distance of the target from the center of the robot
+   * @param pidTuner libraries.PIDController pidtuner object tuned for this function.
+   * setTarget should be set to 0 prior to calling this function.
+   * @param maxTurnSpeed Maximum outputs of the PID function
+   */
+  public void turn(double Error, PIDController pidTuner, double maxTurnSpeed, double jsx, double jsy) {
+    pidTuner.setInput(Error);
+
+    SmartDashboard.putNumber("Target Error", Error);
+
+    m_driveTrain.drive(
+      pidTuner.calculate(
+        maxTurnSpeed, -maxTurnSpeed
+      ), 
+      jsx, 
+      jsy
+    );
   }
 
   /**
