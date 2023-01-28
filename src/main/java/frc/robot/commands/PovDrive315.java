@@ -5,13 +5,17 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.LimelightServer;
+import frc.robot.subsystems.Drivetrain;
 
-public class TogglePipeline extends CommandBase {
-  int pipeLine = 0; // When 0, be in cube mode hmm cube cube cube
-
-  /** Creates a new TogglePipeline. */
-  public TogglePipeline() {}
+public class PovDrive315 extends CommandBase {
+  Drivetrain m_Drivetrain;
+  double m_speed;
+  /** Creates a new PovDrive180. */
+  public PovDrive315(Drivetrain DriveTrain, double speed) {
+    addRequirements(DriveTrain);
+    m_Drivetrain = DriveTrain;
+    m_speed = speed;
+  }
 
   // Called when the command is initially scheduled.
   @Override
@@ -20,12 +24,7 @@ public class TogglePipeline extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    // toggle from 0 to 1 and vice versa
-    // Checking for 0 is faster on most CPUs
-    if (pipeLine == 0) {pipeLine = 1;
-    } else {pipeLine = 0;}
-
-    LimelightServer.Pipeline.setNumber(pipeLine);
+    m_Drivetrain.drive(0, -m_speed, -m_speed);
   }
 
   // Called once the command ends or is interrupted.
@@ -35,6 +34,6 @@ public class TogglePipeline extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return true;
+    return false;
   }
 }

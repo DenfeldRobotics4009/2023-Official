@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.util.function.BooleanSupplier;
+
 // glory to felix the helix
 
 import edu.wpi.first.wpilibj.GenericHID;
@@ -12,7 +14,16 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.commands.DefaultDriveCommand;
+import frc.robot.commands.PovDrive0;
+import frc.robot.commands.PovDrive135;
+import frc.robot.commands.PovDrive180;
+import frc.robot.commands.PovDrive225;
+import frc.robot.commands.PovDrive270;
+import frc.robot.commands.PovDrive315;
+import frc.robot.commands.PovDrive45;
+import frc.robot.commands.PovDrive90;
 import frc.robot.commands.TogglePipeline;
 import frc.robot.commands.TurnTowardsTarget;
 import frc.robot.subsystems.Autonomous;
@@ -63,9 +74,21 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    JoystickButton d1 = new JoystickButton(m_jsDriver, 1);
-    JoystickButton d2 = new JoystickButton(m_jsDriver, 2);
-    JoystickButton d3 = new JoystickButton(m_jsDriver, 3);
+
+    // JSY -- Swerve Drive
+    // JSX --
+    // JSZ -- 
+    // HAT 1
+    // HAT 2
+    // HAT 3
+    // HAT 4
+    // HAT 5
+    // HAT 6
+    // HAT 7
+    // HAT 8
+    JoystickButton d1 = new JoystickButton(m_jsDriver, 1); // Precision mode
+    JoystickButton d2 = new JoystickButton(m_jsDriver, 2); // Auto lineup
+    JoystickButton d3 = new JoystickButton(m_jsDriver, 3); // Switch pipeline
     JoystickButton d4 = new JoystickButton(m_jsDriver, 4);
     JoystickButton d5 = new JoystickButton(m_jsDriver, 5);
     JoystickButton d6 = new JoystickButton(m_jsDriver, 6);
@@ -75,9 +98,50 @@ public class RobotContainer {
     JoystickButton d10 = new JoystickButton(m_jsDriver, 10);
     JoystickButton d11 = new JoystickButton(m_jsDriver, 11);
     JoystickButton d12 = new JoystickButton(m_jsDriver, 12);
+    
+    POVButton dpov0 = new POVButton(m_jsDriver, 0);
+    POVButton dpov45 = new POVButton(m_jsDriver, 45);
+    POVButton dpov90 = new POVButton(m_jsDriver, 90);
+    POVButton dpov135 = new POVButton(m_jsDriver, 135);
+    POVButton dpov180 = new POVButton(m_jsDriver, 180);
+    POVButton dpov225 = new POVButton(m_jsDriver, 225);
+    POVButton dpov270 = new POVButton(m_jsDriver, 270);
+    POVButton dpov315 = new POVButton(m_jsDriver, 315);
 
+    double speed = 0.2;
+    dpov0.whileTrue(new PovDrive0(m_drivetrainSubsystem, speed * Constants.MAX_VELOCITY_METERS_PER_SECOND));
+    dpov45.whileTrue(new PovDrive45(m_drivetrainSubsystem, speed * Constants.MAX_VELOCITY_METERS_PER_SECOND));
+    dpov90.whileTrue(new PovDrive90(m_drivetrainSubsystem, speed * Constants.MAX_VELOCITY_METERS_PER_SECOND));
+    dpov135.whileTrue(new PovDrive135(m_drivetrainSubsystem, speed * Constants.MAX_VELOCITY_METERS_PER_SECOND));
+    dpov180.whileTrue(new PovDrive180(m_drivetrainSubsystem, speed * Constants.MAX_VELOCITY_METERS_PER_SECOND));
+    dpov225.whileTrue(new PovDrive225(m_drivetrainSubsystem, speed * Constants.MAX_VELOCITY_METERS_PER_SECOND));
+    dpov270.whileTrue(new PovDrive270(m_drivetrainSubsystem, speed * Constants.MAX_VELOCITY_METERS_PER_SECOND));
+    dpov315.whileTrue(new PovDrive315(m_drivetrainSubsystem, speed * Constants.MAX_VELOCITY_METERS_PER_SECOND));
+    
+
+    d3.onTrue(new TogglePipeline());
+    d2.whileTrue(
+      new TurnTowardsTarget(
+        m_autoSubsystem, m_drivetrainSubsystem, 
+        () -> m_jsDriver.getX() * Constants.MAX_VELOCITY_METERS_PER_SECOND,
+        () -> m_jsDriver.getY() * Constants.MAX_VELOCITY_METERS_PER_SECOND
+      )
+    );
+
+
+    // JSY - Up and down arm
+    // JSX
+    // JSZ
+    // HAT 1 // Up        - Extend arm
+    // HAT 2 // clockwise
+    // HAT 3
+    // HAT 4
+    // HAT 5              - Retrack arm
+    // HAT 6
+    // HAT 7
+    // HAT 8
     JoystickButton o1 = new JoystickButton(m_jsOperator, 1);
-    JoystickButton o2 = new JoystickButton(m_jsOperator, 2);
+    JoystickButton o2 = new JoystickButton(m_jsOperator, 2); // grabber piston - toggle in/out
     JoystickButton o3 = new JoystickButton(m_jsOperator, 3);
     JoystickButton o4 = new JoystickButton(m_jsOperator, 4);
     JoystickButton o5 = new JoystickButton(m_jsOperator, 5);
@@ -87,15 +151,6 @@ public class RobotContainer {
     JoystickButton o9 = new JoystickButton(m_jsOperator, 9);
     JoystickButton o11 = new JoystickButton(m_jsOperator, 11);
     JoystickButton o12 = new JoystickButton(m_jsOperator, 12);
-
-    d1.onTrue(new TogglePipeline());
-    d2.whileTrue(
-      new TurnTowardsTarget(
-        m_autoSubsystem, m_drivetrainSubsystem, 
-        () -> m_jsDriver.getX() * Constants.MAX_VELOCITY_METERS_PER_SECOND,
-        () -> m_jsDriver.getY() * Constants.MAX_VELOCITY_METERS_PER_SECOND
-      )
-    );
   }
 
   /**
