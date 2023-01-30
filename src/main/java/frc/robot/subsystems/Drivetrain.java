@@ -168,7 +168,7 @@ public class Drivetrain extends SubsystemBase {
     return clamp(-MAX_VOLTAGE, MAX_VOLTAGE, setSpeed + recursiveError[i] );
   }
 
-  double clamp(double in, double max, double min) {
+  public static double clamp(double in, double max, double min) {
     if (in > max) {return max;}
     if (in < min) {return min;}
     return in;
@@ -190,6 +190,12 @@ public class Drivetrain extends SubsystemBase {
     // Display values
     SmartDashboard.putNumber("Max Turning Power", max);
     SmartDashboard.putNumber("Voltage", RobotController.getBatteryVoltage());
+
+    SmartDashboard.putNumber("Recursive L1", recursiveError[0]);
+    SmartDashboard.putNumber("Recursive R1", recursiveError[1]);
+    SmartDashboard.putNumber("Recursive L2", recursiveError[2]);
+    SmartDashboard.putNumber("Recursive R2", recursiveError[3]);
+
     // Pull wheel values from kinematics object
     SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(new ChassisSpeeds(jsX, jsY, jsZ));
     // Drive based on pulled states

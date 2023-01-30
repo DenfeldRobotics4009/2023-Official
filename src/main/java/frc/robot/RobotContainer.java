@@ -58,6 +58,7 @@ public class RobotContainer {
     // Right stick X axis -> rotation
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
             m_drivetrainSubsystem,
+            () -> m_jsDriver.getTrigger(),
             () -> m_jsDriver.getX() * Constants.MAX_VELOCITY_METERS_PER_SECOND,
             () -> m_jsDriver.getY() * Constants.MAX_VELOCITY_METERS_PER_SECOND,
             () -> m_jsDriver.getZ() * Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
@@ -78,7 +79,7 @@ public class RobotContainer {
     // JSY -- Swerve Drive
     // JSX --
     // JSZ -- 
-    // HAT 1
+    // HAT 1 -- HAT drive
     // HAT 2
     // HAT 3
     // HAT 4

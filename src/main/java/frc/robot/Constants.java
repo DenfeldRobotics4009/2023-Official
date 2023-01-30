@@ -94,20 +94,4 @@ public final class Constants {
     public static final double[] MagOffset = {
         L1SMagnetOffset, R1SMagnetOffset, L2SMagnetOffset, R2SMagnetOffset
     };
-
-    /**
-     * 
-     */
-    public static final double[] purpleRange = {
-        0, 0, 0,
-        0, 0, 0
-    };
-
-    /**
-     * 
-     */
-    public static final double[] yellowRange = {
-        0, 0, 0,
-        0, 0, 0
-    };
 }
