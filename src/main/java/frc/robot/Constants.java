@@ -15,12 +15,6 @@ import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-
-    /**
-     * Jank constant
-     */
-    public static final double PIXELS_TO_METERS = 1;
-
     /**
      * The left-to-right distance between the drivetrain wheels
      *
@@ -94,4 +88,6 @@ public final class Constants {
     public static final double[] MagOffset = {
         L1SMagnetOffset, R1SMagnetOffset, L2SMagnetOffset, R2SMagnetOffset
     };
+
+    public static final int ArmID = 0; // TODO
 }

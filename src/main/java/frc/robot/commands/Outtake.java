@@ -5,11 +5,14 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.libraries.Manipulator;
 
 public class Outtake extends CommandBase {
+  Manipulator m_man;
   /** Creates a new Outtake. */
-  public Outtake() {
-    // Use addRequirements() here to declare subsystem dependencies.
+  public Outtake(Manipulator manipulator) {
+    addRequirements(manipulator);
+    m_man = manipulator;
   }
 
   // Called when the command is initially scheduled.
@@ -27,6 +30,6 @@ public class Outtake extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return true;
   }
 }

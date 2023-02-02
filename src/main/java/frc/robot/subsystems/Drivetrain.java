@@ -191,6 +191,7 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Max Turning Power", max);
     SmartDashboard.putNumber("Voltage", RobotController.getBatteryVoltage());
 
+    SmartDashboard.putNumber("Amnesia Meter", average(recursiveError));
     SmartDashboard.putNumber("Recursive L1", recursiveError[0]);
     SmartDashboard.putNumber("Recursive R1", recursiveError[1]);
     SmartDashboard.putNumber("Recursive L2", recursiveError[2]);
@@ -200,6 +201,12 @@ public class Drivetrain extends SubsystemBase {
     SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(new ChassisSpeeds(jsX, jsY, jsZ));
     // Drive based on pulled states
     p_drive(states);
+  }
+
+  double average(double... input) {
+    double out = 0;
+    for (double d : input) {out += d;}
+    return out / input.length;
   }
 
   /**

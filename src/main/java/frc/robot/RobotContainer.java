@@ -15,7 +15,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
-import frc.robot.commands.DefaultDriveCommand;
+import frc.robot.commands.DefaultDrive;
+import frc.robot.commands.DefaultPitch;
 import frc.robot.commands.PovDrive0;
 import frc.robot.commands.PovDrive135;
 import frc.robot.commands.PovDrive180;
@@ -26,6 +27,7 @@ import frc.robot.commands.PovDrive45;
 import frc.robot.commands.PovDrive90;
 import frc.robot.commands.TogglePipeline;
 import frc.robot.commands.TurnTowardsTarget;
+import frc.robot.libraries.Manipulator;
 import frc.robot.subsystems.Autonomous;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.LimelightServer;
@@ -40,6 +42,8 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final Drivetrain m_drivetrainSubsystem = new Drivetrain();
 
+  private final Manipulator m_manipulator = new Manipulator();
+
   private final Autonomous m_autoSubsystem = new Autonomous(m_drivetrainSubsystem);
 
   private final LimelightServer m_limeLight = new LimelightServer();
@@ -51,18 +55,21 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    // Set up the default command for the drivetrain.
-    // The controls are for field-oriented driving:
-    // Left stick Y axis -> forward and backwards movement
-    // Left stick X axis -> left and right movement
-    // Right stick X axis -> rotation
-    m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
+
+    m_drivetrainSubsystem.setDefaultCommand(new DefaultDrive(
             m_drivetrainSubsystem,
             () -> m_jsDriver.getTrigger(),
             () -> m_jsDriver.getX() * Constants.MAX_VELOCITY_METERS_PER_SECOND,
             () -> m_jsDriver.getY() * Constants.MAX_VELOCITY_METERS_PER_SECOND,
             () -> m_jsDriver.getZ() * Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
     ));
+
+    m_manipulator.setDefaultCommand(
+      new DefaultPitch(
+        m_manipulator, 
+        () -> m_jsOperator.getY()
+      )
+    );
 
     // Configure the button bindings
     configureButtonBindings();

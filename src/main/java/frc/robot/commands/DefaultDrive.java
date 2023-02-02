@@ -10,7 +10,7 @@ import frc.robot.subsystems.Drivetrain;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
-public class DefaultDriveCommand extends CommandBase {
+public class DefaultDrive extends CommandBase {
     private final Drivetrain m_drivetrainSubsystem;
 
     private final DoubleSupplier m_translationXSupplier;
@@ -24,7 +24,7 @@ public class DefaultDriveCommand extends CommandBase {
     double recursiveAdd, recursiveTurnAdd;
     double pidOut, pidTurnOut;
 
-    public DefaultDriveCommand(Drivetrain drivetrainSubsystem,
+    public DefaultDrive(Drivetrain drivetrainSubsystem,
                                BooleanSupplier precisionMode,
                                DoubleSupplier translationXSupplier,
                                DoubleSupplier translationYSupplier,

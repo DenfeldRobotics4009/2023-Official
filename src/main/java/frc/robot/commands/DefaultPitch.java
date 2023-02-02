@@ -4,12 +4,22 @@
 
 package frc.robot.commands;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.libraries.Manipulator;
 
 public class DefaultPitch extends CommandBase {
+  Manipulator m_manipulator;
+  DoubleSupplier m_jsY;
   /** Creates a new DefaultPitch. */
-  public DefaultPitch() {
-    // Use addRequirements() here to declare subsystem dependencies.
+  public DefaultPitch(
+    Manipulator manipulator,
+    DoubleSupplier jsY
+  ) {
+    m_jsY = jsY;
+    m_manipulator = manipulator;
+    addRequirements(manipulator);
   }
 
   // Called when the command is initially scheduled.
@@ -18,7 +28,9 @@ public class DefaultPitch extends CommandBase {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    m_manipulator.yControl(m_jsY.getAsDouble());
+  }
 
   // Called once the command ends or is interrupted.
   @Override

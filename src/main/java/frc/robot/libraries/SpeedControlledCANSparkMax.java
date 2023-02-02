@@ -2,9 +2,15 @@ package frc.robot.libraries;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
-import frc.robot.Constants;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
+ * 
+ * // TODO TEST PLEASE OMG TEST IT AAAAAAAAAAAAAAA
+ * 
+ * This is a speed based antipush
+ * 
  * A class holding info for, and to control, a single
  * CANSpark max to apply antipush for multiple purposes.
  * 
@@ -14,18 +20,20 @@ import frc.robot.Constants;
  * will apply power to maintain at a zero speed. When the motor
  * does this, it will be applying power to a non-moving motor
  * causing extreme rises in the motors tempurature.
+ * 
+ * @implNote Dimensia free since 1983, just say not idiot
  */
-public class ReactiveCANSparkMax {
-    CANSparkMax m_Motor;
-    RelativeEncoder m_Encoder;
+public class SpeedControlledCANSparkMax {
+    public CANSparkMax m_Motor;
+    public RelativeEncoder m_Encoder;
     
     double recursiveError = 0;
 
     // TODO * Tune default values, make them values ment for drive? obviously operating an arm
     // TODO * with antipush will take MUCH lower values.
-    double recursiveErrorGrowthMax = 0.004; // 0.05 / 12 heehoo
+    double recursiveErrorGrowthMax = 0.01; // 0.05 / 12 heehoo
     double recursiveErrorClampMax = 1;
-    double P = 2, I = 0, D = 0.8;
+    double P = 0.00002, I = 0, D = 0.000001;
 
     PIDController pid = new PIDController(P, I, D, 0);
 
@@ -34,7 +42,7 @@ public class ReactiveCANSparkMax {
      * @param Motor A new CANSparkMax with an encoder on the motor.
      * @implNote PID values are tuned (approximately) for drive motors by default.
      */
-    public ReactiveCANSparkMax(CANSparkMax Motor) {
+    public SpeedControlledCANSparkMax(CANSparkMax Motor) {
         m_Motor = Motor;
         m_Encoder = Motor.getEncoder();
         // PID input is the error, rather than speeds. Thus the goal
@@ -51,7 +59,7 @@ public class ReactiveCANSparkMax {
      * @param maximum default 0.004
      * @return self, for chaining
      */
-    public ReactiveCANSparkMax setPID(double P, double I, double D) {
+    public SpeedControlledCANSparkMax setPID(double P, double I, double D) {
         pid.kP = P; 
         pid.kI = I; 
         pid.kD = D;
@@ -65,7 +73,7 @@ public class ReactiveCANSparkMax {
      * @param RecursiveErrorGrowthMax default 0.004
      * @return self, for chaining
      */
-    public ReactiveCANSparkMax setMaximums(double RecursiveErrorClampMax, double RecursiveErrorGrowthMax) {
+    public SpeedControlledCANSparkMax setMaximums(double RecursiveErrorClampMax, double RecursiveErrorGrowthMax) {
         recursiveErrorClampMax = RecursiveErrorClampMax;
         recursiveErrorGrowthMax = RecursiveErrorGrowthMax;
 
@@ -78,6 +86,8 @@ public class ReactiveCANSparkMax {
      */
     public void set(double speed) {
         m_Motor.set(calculateErrorOffset(speed));
+        
+        SmartDashboard.putNumber("recursiveError", recursiveError);
     }
 
     /**
@@ -108,7 +118,7 @@ public class ReactiveCANSparkMax {
      * @return the sum of the drive input, and the recusive error value
      */
     double calculateErrorOffset(double S) {
-        double idealRPM = S * Constants.MAX_NEO_RPM;
+        double idealRPM = S * 5676; // NMEO max rpm
         // Distance of real vilocity from wanted vilocity
         double E = m_Encoder.getVelocity() - idealRPM;
         // Communicate to PID loop
