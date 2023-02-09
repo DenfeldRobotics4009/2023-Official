@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import java.util.function.BooleanSupplier;
-
 // glory to felix the helix
 
 import edu.wpi.first.wpilibj.GenericHID;

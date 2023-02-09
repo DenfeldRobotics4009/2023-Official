@@ -9,8 +9,6 @@ import edu.wpi.first.wpilibj.Timer;
 
 /**
  * 
- * // TODO TEST PLEASE OMG TEST IT AAAAAAAAAAAAAAA
- * 
  * This is a speed based antipush
  * 
  * A class holding info for, and to control, a single
@@ -22,8 +20,6 @@ import edu.wpi.first.wpilibj.Timer;
  * will apply power to maintain at a zero speed. When the motor
  * does this, it will be applying power to a non-moving motor
  * causing extreme rises in the motors tempurature.
- * 
- * @implNote Dimensia free since 1983, just say not idiot
  */
 public class PositionControlledCANSparkMax {
     public CANSparkMax m_Motor;
