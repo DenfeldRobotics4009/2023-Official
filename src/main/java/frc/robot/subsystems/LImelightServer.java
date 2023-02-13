@@ -39,7 +39,15 @@ public class LimelightServer extends SubsystemBase {
      */
     Pipeline = limeLight.getEntry("pipeline");
     
-  /** Creates a new LImelightServer. */
+  /** 
+   * Creates a new LimelightServer. 
+   * 
+   * Regardless of the public static status of items in this class,
+   * this subsystem will still need to be initialized for the code running
+   * in this constructor.
+   * 
+   * Yes I'm aware its a single line :3
+   */
   public LimelightServer() {
     LedMode.setNumber(1); // force lights off
     // Use defaults configured in the limelight webpage

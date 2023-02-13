@@ -14,21 +14,14 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.commands.DefaultDrive;
-import frc.robot.commands.DefaultPitch;
-import frc.robot.commands.PovDrive0;
-import frc.robot.commands.PovDrive135;
-import frc.robot.commands.PovDrive180;
-import frc.robot.commands.PovDrive225;
-import frc.robot.commands.PovDrive270;
-import frc.robot.commands.PovDrive315;
-import frc.robot.commands.PovDrive45;
-import frc.robot.commands.PovDrive90;
+import frc.robot.commands.DefaultOperate;
+import frc.robot.commands.PovDrive;
 import frc.robot.commands.TogglePipeline;
 import frc.robot.commands.TurnTowardsTarget;
-import frc.robot.libraries.Manipulator;
 import frc.robot.subsystems.Autonomous;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.LimelightServer;
+import frc.robot.subsystems.Manipulator;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -62,10 +55,22 @@ public class RobotContainer {
             () -> m_jsDriver.getZ() * Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
     ));
 
+    
     m_manipulator.setDefaultCommand(
-      new DefaultPitch(
+      new DefaultOperate(
         m_manipulator, 
-        () -> m_jsOperator.getY()
+        () -> m_jsOperator.getY(),
+        () -> m_jsOperator.getThrottle(),
+
+        () -> m_jsOperator.getRawButton(6), // Wrist Up
+        () -> m_jsOperator.getRawButton(5), // Wrist Down
+
+        () -> m_jsOperator.getRawButton(2), // Intake
+        () -> m_jsOperator.getRawButton(1), // Outtake
+
+        () -> m_jsOperator.getRawButton(12), // Override
+
+        () -> m_jsOperator.getPOV()
       )
     );
 
@@ -92,7 +97,7 @@ public class RobotContainer {
     // HAT 6
     // HAT 7
     // HAT 8
-    JoystickButton d1 = new JoystickButton(m_jsDriver, 1); // Precision mode
+    // JoystickButton d1 = new JoystickButton(m_jsDriver, 1); // Precision mode
     JoystickButton d2 = new JoystickButton(m_jsDriver, 2); // Auto lineup
     JoystickButton d3 = new JoystickButton(m_jsDriver, 3); // Switch pipeline
     JoystickButton d4 = new JoystickButton(m_jsDriver, 4);
@@ -114,15 +119,10 @@ public class RobotContainer {
     POVButton dpov270 = new POVButton(m_jsDriver, 270);
     POVButton dpov315 = new POVButton(m_jsDriver, 315);
 
-    double speed = 0.2;
-    dpov0.whileTrue(new PovDrive0(m_drivetrainSubsystem, speed * Constants.MAX_VELOCITY_METERS_PER_SECOND));
-    dpov45.whileTrue(new PovDrive45(m_drivetrainSubsystem, speed * Constants.MAX_VELOCITY_METERS_PER_SECOND));
-    dpov90.whileTrue(new PovDrive90(m_drivetrainSubsystem, speed * Constants.MAX_VELOCITY_METERS_PER_SECOND));
-    dpov135.whileTrue(new PovDrive135(m_drivetrainSubsystem, speed * Constants.MAX_VELOCITY_METERS_PER_SECOND));
-    dpov180.whileTrue(new PovDrive180(m_drivetrainSubsystem, speed * Constants.MAX_VELOCITY_METERS_PER_SECOND));
-    dpov225.whileTrue(new PovDrive225(m_drivetrainSubsystem, speed * Constants.MAX_VELOCITY_METERS_PER_SECOND));
-    dpov270.whileTrue(new PovDrive270(m_drivetrainSubsystem, speed * Constants.MAX_VELOCITY_METERS_PER_SECOND));
-    dpov315.whileTrue(new PovDrive315(m_drivetrainSubsystem, speed * Constants.MAX_VELOCITY_METERS_PER_SECOND));
+    double speed = 0.01;
+    dpov0.or(dpov45.or(dpov90.or(dpov135.or(dpov180.or(dpov225.or(dpov270.or(dpov315))))))).whileTrue(
+      new PovDrive(m_drivetrainSubsystem, speed, () -> m_jsDriver.getPOV())
+    );
     
 
     d3.onTrue(new TogglePipeline());
@@ -146,12 +146,12 @@ public class RobotContainer {
     // HAT 6
     // HAT 7
     // HAT 8
-    JoystickButton o1 = new JoystickButton(m_jsOperator, 1);
-    JoystickButton o2 = new JoystickButton(m_jsOperator, 2); // grabber piston - toggle in/out
+    // JoystickButton o1 = new JoystickButton(m_jsOperator, 1); // Intake/Outtake
+    // JoystickButton o2 = new JoystickButton(m_jsOperator, 2); // Outtake/Intake
     JoystickButton o3 = new JoystickButton(m_jsOperator, 3);
-    JoystickButton o4 = new JoystickButton(m_jsOperator, 4);
+    // JoystickButton o4 = new JoystickButton(m_jsOperator, 4); // wrist down
     JoystickButton o5 = new JoystickButton(m_jsOperator, 5);
-    JoystickButton o6 = new JoystickButton(m_jsOperator, 6);
+    // JoystickButton o6 = new JoystickButton(m_jsOperator, 6); // Wrist up
     JoystickButton o8 = new JoystickButton(m_jsOperator, 8);
     JoystickButton o7 = new JoystickButton(m_jsOperator, 7);
     JoystickButton o9 = new JoystickButton(m_jsOperator, 9);

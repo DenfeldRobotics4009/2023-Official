@@ -3,6 +3,9 @@ package frc.robot.libraries;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 
+import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -25,6 +28,10 @@ public class SpeedControlledCANSparkMax {
     
     double recursiveError = 0;
 
+    public String name = "";
+    private static ShuffleboardTab kTab = Shuffleboard.getTab("SpeedControlCAN");
+    public GenericEntry Entry;
+
     // TODO * Tune default values, make them values ment for drive? obviously operating an arm
     // TODO * with antipush will take MUCH lower values.
     double recursiveErrorGrowthMax = 0.01; // 0.05 / 12 heehoo
@@ -38,12 +45,15 @@ public class SpeedControlledCANSparkMax {
      * @param Motor A new CANSparkMax with an encoder on the motor.
      * @implNote PID values are tuned (approximately) for drive motors by default.
      */
-    public SpeedControlledCANSparkMax(CANSparkMax Motor) {
+    public SpeedControlledCANSparkMax(CANSparkMax Motor, String Name) {
         m_Motor = Motor;
         m_Encoder = Motor.getEncoder();
         // PID input is the error, rather than speeds. Thus the goal
         // error must always be zero!
         pid.setTarget(0);
+
+        name = Name;
+        Entry = kTab.add(name + " Speed",  0).getEntry();
     }
 
     /**
@@ -82,8 +92,7 @@ public class SpeedControlledCANSparkMax {
      */
     public void set(double speed) {
         m_Motor.set(calculateErrorOffset(speed));
-        
-        SmartDashboard.putNumber("recursiveError", recursiveError);
+        Entry.setDouble(speed);
     }
 
     /**
@@ -113,7 +122,7 @@ public class SpeedControlledCANSparkMax {
      * @param S drive speed input
      * @return the sum of the drive input, and the recusive error value
      */
-    double calculateErrorOffset(double S) {
+    public double calculateErrorOffset(double S) {
         double idealRPM = S * 5676; // NMEO max rpm
         // Distance of real vilocity from wanted vilocity
         double E = m_Encoder.getVelocity() - idealRPM;

@@ -36,16 +36,16 @@ public class DefaultDrive extends CommandBase {
         this.m_rotationSupplier = rotationSupplier;
 
         addRequirements(drivetrainSubsystem);
+
+        factorController.setTarget(0);
+        factorTurnController.setTarget(0);
     }
 
     @Override
     public void execute() {
-
-        factorController.setTarget(0);
-        factorTurnController.setTarget(0);
         // PID target will always be 0, so we read the rror
         double target = (m_PrecisionMode.getAsBoolean()) ? 0.5 : 1;
-        double turntarget = (m_PrecisionMode.getAsBoolean()) ? 0.3 : 0.75;
+        double turntarget = (m_PrecisionMode.getAsBoolean()) ? 0.5 : 0.75;
         // Set error as the input
         factorController.setInput(pidOut-(target));
         factorTurnController.setInput(pidTurnOut-(turntarget));
@@ -61,11 +61,11 @@ public class DefaultDrive extends CommandBase {
         m_drivetrainSubsystem.drive(
             DeadZoneTuner.adjustForDeadzone(
                 m_rotationSupplier.getAsDouble() * pidTurnOut, 
-                0.15 * Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+                0.20 * Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
                 false),
             DeadZoneTuner.adjustForDeadzone(
                 m_translationXSupplier.getAsDouble() * pidOut, 
-                0.1 * Constants.MAX_VELOCITY_METERS_PER_SECOND, 
+                0.05 * Constants.MAX_VELOCITY_METERS_PER_SECOND, 
                 false),
             DeadZoneTuner.adjustForDeadzone(
                 m_translationYSupplier.getAsDouble() * pidOut, 

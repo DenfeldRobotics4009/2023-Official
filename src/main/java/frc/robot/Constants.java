@@ -89,5 +89,14 @@ public final class Constants {
         L1SMagnetOffset, R1SMagnetOffset, L2SMagnetOffset, R2SMagnetOffset
     };
 
-    public static final int ArmID = 0; // TODO
+    public static final int ArmID = 41; // TODO
+    public static final int WinchID = 40; // TODO
+    public static final int WristID = 42; // TODO
+    public static final int IntakeID = 50; // TODO
+
+    public static final double ArmMaximumLengthRot = 200; // twoo hundo
+    public static final double ArmMaximumHightRot = -75; // Use in min
+    public static final double WristMaximumAngleRot = -30; // use in min
+
+    public static final double intakeSpeed = 0.3;
 }

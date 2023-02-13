@@ -3,9 +3,10 @@ package frc.robot.libraries;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 /**
  * 
@@ -22,6 +23,11 @@ import edu.wpi.first.wpilibj.Timer;
  * causing extreme rises in the motors tempurature.
  */
 public class PositionControlledCANSparkMax {
+
+    public String name = "";
+    public static ShuffleboardTab kTab = Shuffleboard.getTab("PosiControlCAN");
+    public GenericEntry EntrySpeed, EntryError, EntryPos;
+
     public CANSparkMax m_Motor;
     public RelativeEncoder m_Encoder;
     
@@ -29,7 +35,7 @@ public class PositionControlledCANSparkMax {
 
     public Timer Interval = new Timer();
 
-    double idealPosition = 0;
+    public double idealPosition = 0;
 
     double P = 0.1, I = 0, D = 0;
 
@@ -37,20 +43,32 @@ public class PositionControlledCANSparkMax {
 
     double maxPidOutput = 1;
 
+    double maxEPos = 0, minEPos = 0;
+    boolean reverseMaximumCheck = false;
+
     /**
      * Creates a new CANSpark max framwork to automatically use antipush systems.
+     * 
+     * @implNote The encoder position is set to 0 during startup, thus the robot
+     * MUST be in its zero position before startup for its manipulator(s) to work properly
+     * 
      * @param Motor A new CANSparkMax with an encoder on the motor.
      * @implNote PID values are tuned (approximately) for drive motors by default.
      */
-    public PositionControlledCANSparkMax(CANSparkMax Motor) {
+    public PositionControlledCANSparkMax(CANSparkMax Motor, String Name) {
         m_Motor = Motor;
         m_Encoder = Motor.getEncoder();
-        m_Encoder.setPosition(0);
+        m_Encoder.setPosition(0); 
         // PID input is the error, rather than speeds. Thus the goal
         // error must always be zero!
         pid.setTarget(0);
 
         Interval.start();
+
+        name = Name;
+        EntrySpeed = kTab.add(name + " Speed",  0).getEntry();
+        EntryError = kTab.add(name + " Error",  0).getEntry();
+        EntryPos = kTab.add(name + " Rotations", 0).getEntry();
     }
 
     /**
@@ -74,8 +92,18 @@ public class PositionControlledCANSparkMax {
      * Configures the maximum PID outputs
      * @param double default 1
      */
-    public PositionControlledCANSparkMax setMaximums(double MaxPIDOutput) {
+    public PositionControlledCANSparkMax setMaximums(
+        double MaxPIDOutput,
+        double MaxEncoderPosition,
+        double MinEncoderPosition,
+        boolean ReverseMaxRead
+    ) {
         maxPidOutput = MaxPIDOutput;
+
+        maxEPos = MaxEncoderPosition;
+        minEPos = MinEncoderPosition;
+
+        reverseMaximumCheck = ReverseMaxRead;
 
         return this;
     }
@@ -86,11 +114,18 @@ public class PositionControlledCANSparkMax {
      */
     public void set(double speed) {
         double s = calculateErrorOffset(speed);
+
+        double f = reverseMaximumCheck ? -1 : 1;
+
+        EntryPos.setDouble(m_Encoder.getPosition());
+
+        if (maxEPos != 0 && minEPos != 0) {
+            if (m_Encoder.getPosition() >= maxEPos && s*f > 0) {s = 0;}
+            else if (m_Encoder.getPosition() <= minEPos && s*f < 0) {s = 0;}
+        }
+
         m_Motor.set(s);
-        
-        SmartDashboard.putNumber("Speed", s);
-        SmartDashboard.putNumber("IdealPosition", idealPosition);
-        SmartDashboard.putNumber("RealPosition", m_Encoder.getPosition());
+        EntrySpeed.setDouble(s);
     }
 
     /**
@@ -120,7 +155,7 @@ public class PositionControlledCANSparkMax {
      * @param S drive speed input
      * @return the sum of the drive input, and the recusive error value
      */
-    double calculateErrorOffset(double S) {
+    public double calculateErrorOffset(double S) {
 
         final double i = 0.1;
         if (Interval.hasElapsed(i)) {
@@ -129,6 +164,7 @@ public class PositionControlledCANSparkMax {
 
         // Distance of real vilocity from wanted vilocity
         double E = m_Encoder.getPosition() - idealPosition;
+        EntryError.setDouble(E); // Display error
         // Communicate to PID loop
         pid.setInput(E);
         // Clamp the sum of the drive speed and recursive value
