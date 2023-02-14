@@ -15,13 +15,17 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.commands.DefaultDrive;
 import frc.robot.commands.DefaultOperate;
+import frc.robot.commands.IntakeCone;
+import frc.robot.commands.IntakeCube;
+import frc.robot.commands.OuttakeCube;
 import frc.robot.commands.PovDrive;
 import frc.robot.commands.TogglePipeline;
 import frc.robot.commands.TurnTowardsTarget;
 import frc.robot.subsystems.Autonomous;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LimelightServer;
-import frc.robot.subsystems.Manipulator;
+import frc.robot.subsystems.Arm;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -33,7 +37,8 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final Drivetrain m_drivetrainSubsystem = new Drivetrain();
 
-  private final Manipulator m_manipulator = new Manipulator();
+  private final Arm m_manipulator = new Arm();
+  private final Intake m_intake = new Intake();
 
   private final Autonomous m_autoSubsystem = new Autonomous(m_drivetrainSubsystem);
 
@@ -62,11 +67,8 @@ public class RobotContainer {
         () -> m_jsOperator.getY(),
         () -> m_jsOperator.getThrottle(),
 
-        () -> m_jsOperator.getRawButton(6), // Wrist Up
-        () -> m_jsOperator.getRawButton(5), // Wrist Down
-
-        () -> m_jsOperator.getRawButton(2), // Intake
-        () -> m_jsOperator.getRawButton(1), // Outtake
+        () -> m_jsOperator.getRawButton(7), // Wrist Up
+        () -> m_jsOperator.getRawButton(9), // Wrist Down
 
         () -> m_jsOperator.getRawButton(12), // Override
 
@@ -124,7 +126,6 @@ public class RobotContainer {
       new PovDrive(m_drivetrainSubsystem, speed, () -> m_jsDriver.getPOV())
     );
     
-
     d3.onTrue(new TogglePipeline());
     d2.whileTrue(
       new TurnTowardsTarget(
@@ -133,7 +134,6 @@ public class RobotContainer {
         () -> m_jsDriver.getY() * Constants.MAX_VELOCITY_METERS_PER_SECOND
       )
     );
-
 
     // JSY - Up and down arm
     // JSX
@@ -149,14 +149,20 @@ public class RobotContainer {
     // JoystickButton o1 = new JoystickButton(m_jsOperator, 1); // Intake/Outtake
     // JoystickButton o2 = new JoystickButton(m_jsOperator, 2); // Outtake/Intake
     JoystickButton o3 = new JoystickButton(m_jsOperator, 3);
-    // JoystickButton o4 = new JoystickButton(m_jsOperator, 4); // wrist down
+    JoystickButton o4 = new JoystickButton(m_jsOperator, 4);
     JoystickButton o5 = new JoystickButton(m_jsOperator, 5);
-    // JoystickButton o6 = new JoystickButton(m_jsOperator, 6); // Wrist up
+    JoystickButton o6 = new JoystickButton(m_jsOperator, 6); 
     JoystickButton o8 = new JoystickButton(m_jsOperator, 8);
-    JoystickButton o7 = new JoystickButton(m_jsOperator, 7);
-    JoystickButton o9 = new JoystickButton(m_jsOperator, 9);
+    //JoystickButton o7 = new JoystickButton(m_jsOperator, 7); // wrist down
+    //JoystickButton o9 = new JoystickButton(m_jsOperator, 9); // Wrist up
     JoystickButton o11 = new JoystickButton(m_jsOperator, 11);
     JoystickButton o12 = new JoystickButton(m_jsOperator, 12);
+
+    o5.whileTrue(new IntakeCube());
+    o3.whileTrue(new OuttakeCube());
+
+    o6.whileTrue(new IntakeCone());
+    o4.whileTrue(new OuttakeCube());
   }
 
   /**

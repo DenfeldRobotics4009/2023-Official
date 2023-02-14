@@ -10,24 +10,21 @@ import java.util.function.IntSupplier;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.libraries.DeadZoneTuner;
-import frc.robot.subsystems.Manipulator;
+import frc.robot.subsystems.Arm;
 
 public class DefaultOperate extends CommandBase {
-  Manipulator m_manipulator;
+  Arm m_manipulator;
   DoubleSupplier m_jsY, m_throttle;
   BooleanSupplier m_wristUp, m_wristDown, m_intake, m_outtake, m_override;
   IntSupplier m_pov;
   /** Creates a new DefaultPitch. */
   public DefaultOperate(
-    Manipulator manipulator,
+    Arm manipulator,
     DoubleSupplier jsY,
     DoubleSupplier Throttle,
     
     BooleanSupplier WristUp,
     BooleanSupplier WristDown,
-
-    BooleanSupplier Intake,
-    BooleanSupplier Outtake,
 
     BooleanSupplier Override,
 
@@ -39,9 +36,6 @@ public class DefaultOperate extends CommandBase {
 
     m_wristUp = WristUp;
     m_wristDown = WristDown;
-
-    m_intake = Intake;
-    m_outtake = Outtake;
 
     m_override = Override;
 
@@ -69,10 +63,6 @@ public class DefaultOperate extends CommandBase {
     if (m_wristUp.getAsBoolean()) {z = 0.06;
     } else if (m_wristDown.getAsBoolean()) {z = -0.06;}
 
-    double in = 0;
-    if (m_intake.getAsBoolean()) {in = 1;
-    } else if (m_outtake.getAsBoolean()) {in = -1;}
-
     m_manipulator.drive(
       DeadZoneTuner.adjustForDeadzone(
         m_jsY.getAsDouble(), 0.1, false
@@ -81,9 +71,6 @@ public class DefaultOperate extends CommandBase {
       z * scaler,
       m_override.getAsBoolean()
     );
-
-    m_manipulator.intake(in);
-
   }
 
   // Called once the command ends or is interrupted.

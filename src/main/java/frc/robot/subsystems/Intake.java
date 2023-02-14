@@ -4,11 +4,20 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
-public class Wrist extends SubsystemBase {
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+
+public class Intake extends SubsystemBase {
+  TalonSRX m_intake = new TalonSRX(Constants.IntakeID);
   /** Creates a new Wrist. */
-  public Wrist() {}
+  public Intake() {}
+
+  public void intake(double speed) {
+    m_intake.set(ControlMode.PercentOutput, speed);
+  }
 
   @Override
   public void periodic() {
