@@ -77,10 +77,10 @@ public class Arm extends SubsystemBase {
         1, Constants.ArmMaximumLengthRot, 0.5
       );
       mC_arm.setMaximums(
-        1, 0.5, Constants.ArmMaximumHightRot
+        1, 1, Constants.ArmMaximumHightRot
       );
       mC_wrist.setMaximums(
-        1, 0.5, Constants.WristMaximumAngleRot
+        1, 1.5, Constants.WristMaximumAngleRot
       );
     }
 

@@ -163,7 +163,7 @@ public class PositionControlledCANSparkMax {
 
         // Distance of real vilocity from wanted vilocity
         double E = m_Encoder.getPosition() - idealPosition;
-        EntryError.setDouble(E); // Display error
+        EntryError.setDouble(E); // Display
         // Communicate to PID loop
         pid.setInput(E);
         // Clamp the sum of the drive speed and recursive value
@@ -190,18 +190,18 @@ public class PositionControlledCANSparkMax {
     }
 
     /**
-     * Private for safety. If this function is called when
+     *If this function is called when
      * maxEPos is 0, it will jerk towards 0
      */
-    void LimitMax() {
+    public void LimitMax() {
         idealPosition = maxEPos;
     }
 
     /**
-     * Private for safety. If this function is called when
+     * If this function is called when
      * minEPos is 0, it will jerk towards 0
      */
-    void LimitMin() {
+    public void LimitMin() {
         idealPosition = minEPos;
     }
 
