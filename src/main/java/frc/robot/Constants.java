@@ -78,8 +78,8 @@ public final class Constants {
     public static final int R2SM_ = 34; 
     public static final int R2SE_ = 3;
 
-    public static final double L1SMagnetOffset = -75;
-    public static final double R1SMagnetOffset = 5;
+    public static final double L1SMagnetOffset = -73.5;
+    public static final double R1SMagnetOffset = 3;
     public static final double L2SMagnetOffset = 85;
     public static final double R2SMagnetOffset = 230;
 
@@ -94,9 +94,23 @@ public final class Constants {
     public static final int WristID = 42; // TODO
     public static final int IntakeID = 50; // TODO
 
-    public static final double ArmMaximumLengthRot = 200; // twoo hundo
-    public static final double ArmMaximumHightRot = -75; // Use in min
-    public static final double WristMaximumAngleRot = -30; // use in min
+    public static final double ArmMaximumLengthRot = 190;
+    public static final double ArmMaximumHightRot = -82; // Use in min
+    public static final double WristMaximumAngleRot = -60; // use in min
+
+    public static final double LoadingStationDistGoal = 47;
 
     public static final double intakeSpeed = 0.3;
+
+    // -20.5, 20.5 degrees
+    public static final double LimelightDegreesTarget = -13;
+
+    public static final double WristCubeIntakeRot = -32;
+    public static final double WristConeFlipRot = -36;
+
+    public static final double ConePlace1Rot = -49.66;
+    public static final double ConePlace2Rot = -70.80;
+    public static final double CubePlace2Rot = -57.40;
+
+    // public static final int DistSensorID = 0;
 }

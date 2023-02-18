@@ -14,10 +14,11 @@ import frc.robot.subsystems.Autonomous;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.LimelightServer;
 
-public class TurnTowardsTarget extends CommandBase {
+public class AimTowardsTarget extends CommandBase {
   Autonomous m_auto;
 
-  PIDController pidTuner = new PIDController(0.0025, 0, 0.00025, 0);
+  PIDController TurnController = new PIDController(0.0025, 0, 0.00025, 0);
+  PIDController DriveController = new PIDController(0.04, 0, 0, 0);
 
   DoubleSupplier m_translationYSupplier, m_translationXSupplier;
 
@@ -30,7 +31,7 @@ public class TurnTowardsTarget extends CommandBase {
    * @param translationXSupplier jsX
    * @param translationYSupplier jsY
    */
-  public TurnTowardsTarget(
+  public AimTowardsTarget(
     Autonomous AutoSubsystem, Drivetrain dummyDrive,
     DoubleSupplier translationXSupplier,
     DoubleSupplier translationYSupplier
@@ -45,27 +46,34 @@ public class TurnTowardsTarget extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    pidTuner.setTolerance(1);
+    TurnController.setTolerance(1);
+    TurnController.setTarget(0.5);
+
+    DriveController.setTarget(Constants.LimelightDegreesTarget);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+
+    DriveController.setInput(
+      // Set default input as the target, to make calculate return 0. This also applied to TurnController
+      LimelightServer.ty.getDouble(Constants.LimelightDegreesTarget)
+    );
+
     m_auto.turn(
       // Negative, as this is to calculate which way to turn to turn towards the target.
       -LimelightServer.tx.getDouble(0), 
-      pidTuner, 
+      TurnController, 
       0.5,
 
       // Supply standard jsx and jsy for driving while aiming
       DeadZoneTuner.adjustForDeadzone(
-          m_translationXSupplier.getAsDouble(), 
-          0.1 * Constants.MAX_VELOCITY_METERS_PER_SECOND, 
-          false),
-      DeadZoneTuner.adjustForDeadzone(
-          m_translationYSupplier.getAsDouble(), 
-          0.1 * Constants.MAX_VELOCITY_METERS_PER_SECOND, 
-          false)
+        m_translationXSupplier.getAsDouble(), 
+        0.1 * Constants.MAX_VELOCITY_METERS_PER_SECOND, 
+        false),
+      DriveController.calculate(1, -1)
+        * Constants.MAX_VELOCITY_METERS_PER_SECOND
     );
   }
 

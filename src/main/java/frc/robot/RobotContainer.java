@@ -17,10 +17,16 @@ import frc.robot.commands.DefaultDrive;
 import frc.robot.commands.DefaultOperate;
 import frc.robot.commands.IntakeCone;
 import frc.robot.commands.IntakeCube;
+import frc.robot.commands.LoadingStationDistanceDrive;
+import frc.robot.commands.OuttakeCone;
 import frc.robot.commands.OuttakeCube;
 import frc.robot.commands.PovDrive;
 import frc.robot.commands.TogglePipeline;
-import frc.robot.commands.TurnTowardsTarget;
+import frc.robot.commands.WristGoto;
+import frc.robot.commands.AimTowardsTarget;
+import frc.robot.commands.ArmGoto;
+import frc.robot.commands.BypassOperate;
+import frc.robot.commands.Calibrate;
 import frc.robot.subsystems.Autonomous;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
@@ -69,8 +75,6 @@ public class RobotContainer {
 
         () -> m_jsOperator.getRawButton(7), // Wrist Up
         () -> m_jsOperator.getRawButton(9), // Wrist Down
-
-        () -> m_jsOperator.getRawButton(12), // Override
 
         () -> m_jsOperator.getPOV()
       )
@@ -128,26 +132,25 @@ public class RobotContainer {
     
     d3.onTrue(new TogglePipeline());
     d2.whileTrue(
-      new TurnTowardsTarget(
+      new AimTowardsTarget(
         m_autoSubsystem, m_drivetrainSubsystem, 
         () -> m_jsDriver.getX() * Constants.MAX_VELOCITY_METERS_PER_SECOND,
         () -> m_jsDriver.getY() * Constants.MAX_VELOCITY_METERS_PER_SECOND
       )
     );
 
-    // JSY - Up and down arm
-    // JSX
-    // JSZ
-    // HAT 1 // Up        - Extend arm
-    // HAT 2 // clockwise
-    // HAT 3
-    // HAT 4
-    // HAT 5              - Retrack arm
-    // HAT 6
-    // HAT 7
-    // HAT 8
-    // JoystickButton o1 = new JoystickButton(m_jsOperator, 1); // Intake/Outtake
-    // JoystickButton o2 = new JoystickButton(m_jsOperator, 2); // Outtake/Intake
+    d5.whileTrue(
+      new LoadingStationDistanceDrive(
+          m_drivetrainSubsystem,
+          () -> m_jsDriver.getTrigger(),
+          () -> m_jsDriver.getX() * Constants.MAX_VELOCITY_METERS_PER_SECOND,
+          () -> m_jsDriver.getY() * Constants.MAX_VELOCITY_METERS_PER_SECOND,
+          () -> m_jsDriver.getZ() * Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
+        )
+    );
+
+    JoystickButton o1 = new JoystickButton(m_jsOperator, 1);
+    JoystickButton o2 = new JoystickButton(m_jsOperator, 2);
     JoystickButton o3 = new JoystickButton(m_jsOperator, 3);
     JoystickButton o4 = new JoystickButton(m_jsOperator, 4);
     JoystickButton o5 = new JoystickButton(m_jsOperator, 5);
@@ -155,14 +158,41 @@ public class RobotContainer {
     JoystickButton o8 = new JoystickButton(m_jsOperator, 8);
     //JoystickButton o7 = new JoystickButton(m_jsOperator, 7); // wrist down
     //JoystickButton o9 = new JoystickButton(m_jsOperator, 9); // Wrist up
+    JoystickButton o10 = new JoystickButton(m_jsOperator, 10);
     JoystickButton o11 = new JoystickButton(m_jsOperator, 11);
     JoystickButton o12 = new JoystickButton(m_jsOperator, 12);
 
-    o5.whileTrue(new IntakeCube());
-    o3.whileTrue(new OuttakeCube());
+    /**
+     * .and(o1.negate()) Makes the command require the trigger to not be
+     * pressed to function. Thus, the trigger can act as a function key
+     */
+    o11.and(o12).and(o1.negate()).onFalse(new Calibrate(m_manipulator));
+    o11.and(o12).and(o1.negate()).whileTrue(
+      new BypassOperate(
+        m_manipulator, 
+        () -> m_jsOperator.getY(),
+        () -> m_jsOperator.getThrottle(),
 
-    o6.whileTrue(new IntakeCone());
-    o4.whileTrue(new OuttakeCube());
+        () -> m_jsOperator.getRawButton(7), // Wrist Up
+        () -> m_jsOperator.getRawButton(9), // Wrist Down
+
+        () -> m_jsOperator.getPOV()
+      )
+    );
+
+    o8.and(o1.negate()).whileTrue(new WristGoto(m_manipulator, () -> Constants.WristCubeIntakeRot));
+    o10.and(o1.negate()).whileTrue(new WristGoto(m_manipulator, () -> Constants.WristConeFlipRot));
+    o2.and(o1.negate()).whileTrue(new WristGoto(m_manipulator, () -> -1));
+
+    o8.and(o1).whileTrue(new ArmGoto(m_manipulator, () -> Constants.ConePlace2Rot));
+    o10.and(o1).whileTrue(new ArmGoto(m_manipulator, () -> Constants.CubePlace2Rot));
+    o12.and(o1).whileTrue(new ArmGoto(m_manipulator, () -> Constants.ConePlace1Rot));
+
+    o5.whileTrue(new IntakeCube(m_intake));
+    o3.whileTrue(new OuttakeCube(m_intake));
+
+    o6.whileTrue(new IntakeCone(m_intake));
+    o4.whileTrue(new OuttakeCone(m_intake));
   }
 
   /**

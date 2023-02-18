@@ -12,13 +12,13 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.libraries.DeadZoneTuner;
 import frc.robot.subsystems.Arm;
 
-public class DefaultOperate extends CommandBase {
+public class BypassOperate extends CommandBase {
   Arm m_manipulator;
   DoubleSupplier m_jsY, m_throttle;
   BooleanSupplier m_wristUp, m_wristDown, m_intake, m_outtake, m_override1, m_override2;
   IntSupplier m_pov;
   /** Creates a new DefaultPitch. */
-  public DefaultOperate(
+  public BypassOperate(
     Arm manipulator,
     DoubleSupplier jsY,
     DoubleSupplier Throttle,
@@ -65,7 +65,7 @@ public class DefaultOperate extends CommandBase {
       ) * scaler * 0.4,
       x * scaler,
       z * scaler,
-      false
+      true
     );
   }
 

@@ -5,11 +5,14 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.subsystems.Intake;
 
 public class OuttakeCube extends CommandBase {
-  /** Creates a new OuttakeCube. */
-  public OuttakeCube() {
-    // Use addRequirements() here to declare subsystem dependencies.
+  Intake m_intake;
+  /** Creates a new IntakeCube. */
+  public OuttakeCube(Intake intake) {
+    addRequirements(intake);
+    m_intake = intake;
   }
 
   // Called when the command is initially scheduled.
@@ -18,11 +21,15 @@ public class OuttakeCube extends CommandBase {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    m_intake.intake(1);
+  }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    m_intake.intake(0);
+  }
 
   // Returns true when the command should end.
   @Override

@@ -4,15 +4,21 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.Intake;
+import java.util.function.DoubleSupplier;
 
-public class OuttakeCone extends CommandBase {
-  Intake m_intake;
-  /** Creates a new IntakeCube. */
-  public OuttakeCone(Intake intake) {
-    addRequirements(intake);
-    m_intake = intake;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.subsystems.Arm;
+
+public class ArmGoto extends CommandBase {
+  Arm m_arm;
+  DoubleSupplier m_rot;
+
+  /** Creates a new ArmGoto. */
+  public ArmGoto(Arm arm, DoubleSupplier rotations) {
+    addRequirements(arm);
+
+    m_arm = arm;
+    m_rot = rotations;
   }
 
   // Called when the command is initially scheduled.
@@ -22,18 +28,16 @@ public class OuttakeCone extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_intake.intake(-1);
+    m_arm.mC_arm.idealPosition = m_rot.getAsDouble();
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {
-    m_intake.intake(0);
-  }
+  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return true;
   }
 }

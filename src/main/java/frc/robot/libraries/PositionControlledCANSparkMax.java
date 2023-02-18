@@ -25,26 +25,24 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 public class PositionControlledCANSparkMax {
 
     public String name = "";
-    public static ShuffleboardTab kTab = Shuffleboard.getTab("PosiControlCAN");
+    public static ShuffleboardTab kTab = Shuffleboard.getTab("ControlledCAN");
     public GenericEntry EntrySpeed, EntryError, EntryPos;
 
     public CANSparkMax m_Motor;
     public RelativeEncoder m_Encoder;
     
-    double recursiveError = 0;
-
     public Timer Interval = new Timer();
 
     public double idealPosition = 0;
 
-    double P = 0.1, I = 0, D = 0;
+    double P = 0.1, I = 0, D = 0, maxPidOutput = 1; // Default PID tuning
 
-    PIDController pid = new PIDController(P, I, D, 0);
+    public PIDController pid = new PIDController(P, I, D, 0);
 
-    double maxPidOutput = 1;
-
+    /**
+     * Positional limits. If both are zero, limits are ignored
+     */
     double maxEPos = 0, minEPos = 0;
-    boolean reverseMaximumCheck = false;
 
     /**
      * Creates a new CANSpark max framwork to automatically use antipush systems.
@@ -66,14 +64,14 @@ public class PositionControlledCANSparkMax {
         Interval.start();
 
         name = Name;
-        EntrySpeed = kTab.add(name + " Speed",  0).getEntry();
-        EntryError = kTab.add(name + " Error",  0).getEntry();
-        EntryPos = kTab.add(name + " Rotations", 0).getEntry();
+        EntrySpeed = kTab.addPersistent(name + " Speed",  0).getEntry();
+        EntryError = kTab.addPersistent(name + " Error",  0).getEntry();
+        EntryPos = kTab.addPersistent(name + " Rotations", 0).getEntry();
     }
 
     /**
-     * Configures the embedded PID tuner used for how much
-     * the recursiveError grows or decreases every frame of error.
+     * Configures the embedded PID tuner for how much
+     * power is outputted based upon the error
      * @param P default 2
      * @param I default 0 
      * @param D default 0.8
@@ -95,15 +93,12 @@ public class PositionControlledCANSparkMax {
     public PositionControlledCANSparkMax setMaximums(
         double MaxPIDOutput,
         double MaxEncoderPosition,
-        double MinEncoderPosition,
-        boolean ReverseMaxRead
+        double MinEncoderPosition
     ) {
         maxPidOutput = MaxPIDOutput;
 
         maxEPos = MaxEncoderPosition;
         minEPos = MinEncoderPosition;
-
-        reverseMaximumCheck = ReverseMaxRead;
 
         return this;
     }
@@ -115,13 +110,17 @@ public class PositionControlledCANSparkMax {
     public void set(double speed) {
         double s = calculateErrorOffset(speed);
 
-        double f = reverseMaximumCheck ? -1 : 1;
-
         EntryPos.setDouble(m_Encoder.getPosition());
 
         if (maxEPos != 0 && minEPos != 0) {
-            if (m_Encoder.getPosition() >= maxEPos && s*f > 0) {s = 0;}
-            else if (m_Encoder.getPosition() <= minEPos && s*f < 0) {s = 0;}
+            if (m_Encoder.getPosition() >= maxEPos && s > 0) {
+                s = 0; 
+                LimitMax();
+            }
+            else if (m_Encoder.getPosition() <= minEPos && s < 0) {
+                s = 0; 
+                LimitMin();
+            }
         }
 
         m_Motor.set(s);
@@ -181,5 +180,35 @@ public class PositionControlledCANSparkMax {
         if (input > max) {return max;}
         if (input < min) {return min;}
         return input;
+    }
+
+    /**
+     * Sets the position goal to the encoders current position
+     */
+    public void Reset() {
+        idealPosition = m_Encoder.getPosition();
+    }
+
+    /**
+     * Private for safety. If this function is called when
+     * maxEPos is 0, it will jerk towards 0
+     */
+    void LimitMax() {
+        idealPosition = maxEPos;
+    }
+
+    /**
+     * Private for safety. If this function is called when
+     * minEPos is 0, it will jerk towards 0
+     */
+    void LimitMin() {
+        idealPosition = minEPos;
+    }
+
+    /**
+     * Updates displayed values
+     */
+    public void Update() {
+        EntryPos.setDouble(m_Encoder.getPosition());
     }
 }
