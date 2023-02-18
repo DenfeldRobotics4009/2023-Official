@@ -14,17 +14,16 @@ import frc.robot.subsystems.Arm;
 
 public class BypassOperate extends CommandBase {
   Arm m_manipulator;
-  DoubleSupplier m_jsY, m_throttle;
+  DoubleSupplier m_jsY, m_throttle, m_jsS;
   BooleanSupplier m_wristUp, m_wristDown, m_intake, m_outtake, m_override1, m_override2;
   IntSupplier m_pov;
   /** Creates a new DefaultPitch. */
   public BypassOperate(
     Arm manipulator,
+
     DoubleSupplier jsY,
     DoubleSupplier Throttle,
-    
-    BooleanSupplier WristUp,
-    BooleanSupplier WristDown,
+    DoubleSupplier jsSlider,
 
     IntSupplier POV
   ) {
@@ -32,8 +31,7 @@ public class BypassOperate extends CommandBase {
     m_throttle = Throttle;
     m_pov = POV;
 
-    m_wristUp = WristUp;
-    m_wristDown = WristDown;
+    m_jsS = jsSlider;
 
     m_manipulator = manipulator;
     addRequirements(manipulator);
@@ -47,7 +45,7 @@ public class BypassOperate extends CommandBase {
   @Override
   public void execute() {
 
-    double scaler = (m_throttle.getAsDouble() + 1) / 2;
+    double scaler = (m_throttle.getAsDouble() + 1);
 
     // Interpret buttons
     double x = 0;
@@ -55,16 +53,12 @@ public class BypassOperate extends CommandBase {
     if (m_pov.getAsInt() == 0) {x = 0.15;
     } else if (m_pov.getAsInt() == 180) {x = -0.15;}
 
-    double z = 0;
-    if (m_wristUp.getAsBoolean()) {z = 0.08;
-    } else if (m_wristDown.getAsBoolean()) {z = -0.08;}
-
     m_manipulator.drive(
       DeadZoneTuner.adjustForDeadzone(
         m_jsY.getAsDouble(), 0.1, false
       ) * scaler * 0.4,
       x * scaler,
-      z * scaler,
+      m_jsS.getAsDouble() * 0.08 * scaler,
       true
     );
   }

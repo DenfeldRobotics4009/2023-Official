@@ -71,10 +71,9 @@ public class RobotContainer {
       new DefaultOperate(
         m_manipulator, 
         () -> m_jsOperator.getY(),
-        () -> m_jsOperator.getThrottle(),
+        () -> m_jsOperator.getRawAxis(2),
 
-        () -> m_jsOperator.getRawButton(7), // Wrist Up
-        () -> m_jsOperator.getRawButton(9), // Wrist Down
+        () -> m_jsOperator.getRawAxis(4),
 
         () -> m_jsOperator.getPOV()
       )
@@ -156,8 +155,8 @@ public class RobotContainer {
     JoystickButton o5 = new JoystickButton(m_jsOperator, 5);
     JoystickButton o6 = new JoystickButton(m_jsOperator, 6); 
     JoystickButton o8 = new JoystickButton(m_jsOperator, 8);
-    //JoystickButton o7 = new JoystickButton(m_jsOperator, 7); // wrist down
-    //JoystickButton o9 = new JoystickButton(m_jsOperator, 9); // Wrist up
+    JoystickButton o7 = new JoystickButton(m_jsOperator, 7);
+    JoystickButton o9 = new JoystickButton(m_jsOperator, 9);
     JoystickButton o10 = new JoystickButton(m_jsOperator, 10);
     JoystickButton o11 = new JoystickButton(m_jsOperator, 11);
     JoystickButton o12 = new JoystickButton(m_jsOperator, 12);
@@ -166,33 +165,32 @@ public class RobotContainer {
      * .and(o1.negate()) Makes the command require the trigger to not be
      * pressed to function. Thus, the trigger can act as a function key
      */
-    o11.and(o12).and(o1.negate()).onFalse(new Calibrate(m_manipulator));
-    o11.and(o12).and(o1.negate()).whileTrue(
+    o9.and(o10).and(o1.negate()).onFalse(new Calibrate(m_manipulator));
+    o9.and(o10).and(o1.negate()).whileTrue(
       new BypassOperate(
         m_manipulator, 
         () -> m_jsOperator.getY(),
-        () -> m_jsOperator.getThrottle(),
+        () -> m_jsOperator.getRawAxis(2),
 
-        () -> m_jsOperator.getRawButton(7), // Wrist Up
-        () -> m_jsOperator.getRawButton(9), // Wrist Down
+        () -> m_jsOperator.getRawAxis(4),
 
         () -> m_jsOperator.getPOV()
       )
     );
 
-    o8.and(o1.negate()).whileTrue(new WristGoto(m_manipulator, () -> Constants.WristCubeIntakeRot));
-    o10.and(o1.negate()).whileTrue(new WristGoto(m_manipulator, () -> Constants.WristConeFlipRot));
-    o2.and(o1.negate()).whileTrue(new WristGoto(m_manipulator, () -> -1));
+    o5.and(o2.negate()).whileTrue(new WristGoto(m_manipulator, () -> Constants.WristCubeIntakeRot));
+    o6.and(o2.negate()).whileTrue(new WristGoto(m_manipulator, () -> Constants.WristConeFlipRot));
+    o7.and(o2.negate()).whileTrue(new WristGoto(m_manipulator, () -> -1));
 
-    o8.and(o1).whileTrue(new ArmGoto(m_manipulator, () -> Constants.ConePlace2Rot));
-    o10.and(o1).whileTrue(new ArmGoto(m_manipulator, () -> Constants.CubePlace2Rot));
-    o12.and(o1).whileTrue(new ArmGoto(m_manipulator, () -> Constants.ConePlace1Rot));
+    o5.and(o2).whileTrue(new ArmGoto(m_manipulator, () -> Constants.ConePlace2Rot));
+    o6.and(o2).whileTrue(new ArmGoto(m_manipulator, () -> Constants.CubePlace2Rot));
+    o7.and(o2).whileTrue(new ArmGoto(m_manipulator, () -> Constants.ConePlace1Rot));
 
-    o5.whileTrue(new IntakeCube(m_intake));
-    o3.whileTrue(new OuttakeCube(m_intake));
+    o1.and(o4.negate()).whileTrue(new IntakeCube(m_intake));
+    o3.and(o4.negate()).whileTrue(new OuttakeCube(m_intake));
 
-    o6.whileTrue(new IntakeCone(m_intake));
-    o4.whileTrue(new OuttakeCone(m_intake));
+    o1.and(o4).whileTrue(new IntakeCone(m_intake));
+    o3.and(o4).whileTrue(new OuttakeCone(m_intake));
   }
 
   /**
