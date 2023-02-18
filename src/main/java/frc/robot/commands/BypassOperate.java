@@ -13,18 +13,17 @@ import frc.robot.subsystems.Arm;
 public class BypassOperate extends CommandBase {
   Arm m_manipulator;
   DoubleSupplier m_arm, m_winch, m_wrist;
-  IntSupplier m_pov;
   /** Creates a new DefaultPitch. */
   public BypassOperate(
     Arm manipulator,
 
-    DoubleSupplier Arm,
-    DoubleSupplier Winch,
-    DoubleSupplier Wrist
+    DoubleSupplier arm,
+    DoubleSupplier winch,
+    DoubleSupplier wrist
   ) {
-    m_arm = Arm;
-    m_winch = Winch;
-    m_wrist = Wrist;
+    m_arm = arm;
+    m_winch = winch;
+    m_wrist = wrist;
 
     m_manipulator = manipulator;
     addRequirements(manipulator);

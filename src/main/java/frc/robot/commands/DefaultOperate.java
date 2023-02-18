@@ -14,24 +14,18 @@ import frc.robot.subsystems.Arm;
 
 public class DefaultOperate extends CommandBase {
   Arm m_manipulator;
-  DoubleSupplier m_jsY, m_throttle, m_jsS;
-  BooleanSupplier m_wristUp, m_wristDown, m_intake, m_outtake, m_override1, m_override2;
-  IntSupplier m_pov;
+  DoubleSupplier m_arm, m_winch, m_wrist;
   /** Creates a new DefaultPitch. */
   public DefaultOperate(
     Arm manipulator,
 
-    DoubleSupplier jsY,
-    DoubleSupplier Throttle,
-    DoubleSupplier jsSlider,
-
-    IntSupplier POV
+    DoubleSupplier arm,
+    DoubleSupplier winch,
+    DoubleSupplier wrist
   ) {
-    m_jsY = jsY;
-    m_throttle = Throttle;
-    m_pov = POV;
-
-    m_jsS = jsSlider;
+    m_arm = arm;
+    m_winch = winch;
+    m_wrist = wrist;
 
     m_manipulator = manipulator;
     addRequirements(manipulator);
@@ -44,21 +38,10 @@ public class DefaultOperate extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
-    double scaler = (-m_throttle.getAsDouble() + 1);
-
-    // Interpret buttons
-    double x = 0;
-    // Pov returns -1 if not being pushed
-    if (m_pov.getAsInt() == 0) {x = 0.15;
-    } else if (m_pov.getAsInt() == 180) {x = -0.15;}
-
     m_manipulator.drive(
-      DeadZoneTuner.adjustForDeadzone(
-        m_jsY.getAsDouble(), 0.1, false
-      ) * scaler * 0.4,
-      x * scaler,
-      m_jsS.getAsDouble() * 0.08 * scaler,
+      m_arm.getAsDouble() * 0.4,
+      m_winch.getAsDouble() * 0.2,
+      m_wrist.getAsDouble() * 0.08,
       false
     );
   }
