@@ -70,12 +70,9 @@ public class RobotContainer {
     m_manipulator.setDefaultCommand(
       new DefaultOperate(
         m_manipulator, 
-        () -> m_jsOperator.getY(),
         () -> m_jsOperator.getRawAxis(2),
-
         () -> m_jsOperator.getRawAxis(4),
-
-        () -> m_jsOperator.getPOV()
+        () -> m_jsOperator.getRawAxis(1)
       )
     );
 
@@ -169,12 +166,9 @@ public class RobotContainer {
     o9.and(o10).and(o1.negate()).whileTrue(
       new BypassOperate(
         m_manipulator, 
-        () -> m_jsOperator.getY(),
         () -> m_jsOperator.getRawAxis(2),
-
         () -> m_jsOperator.getRawAxis(4),
-
-        () -> m_jsOperator.getPOV()
+        () -> m_jsOperator.getRawAxis(1)
       )
     );
 

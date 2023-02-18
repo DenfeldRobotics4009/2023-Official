@@ -4,34 +4,27 @@
 
 package frc.robot.commands;
 
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.libraries.DeadZoneTuner;
 import frc.robot.subsystems.Arm;
 
 public class BypassOperate extends CommandBase {
   Arm m_manipulator;
-  DoubleSupplier m_jsY, m_throttle, m_jsS;
-  BooleanSupplier m_wristUp, m_wristDown, m_intake, m_outtake, m_override1, m_override2;
+  DoubleSupplier m_arm, m_winch, m_wrist;
   IntSupplier m_pov;
   /** Creates a new DefaultPitch. */
   public BypassOperate(
     Arm manipulator,
 
-    DoubleSupplier jsY,
-    DoubleSupplier Throttle,
-    DoubleSupplier jsSlider,
-
-    IntSupplier POV
+    DoubleSupplier Arm,
+    DoubleSupplier Winch,
+    DoubleSupplier Wrist
   ) {
-    m_jsY = jsY;
-    m_throttle = Throttle;
-    m_pov = POV;
-
-    m_jsS = jsSlider;
+    m_arm = Arm;
+    m_winch = Winch;
+    m_wrist = Wrist;
 
     m_manipulator = manipulator;
     addRequirements(manipulator);
@@ -44,22 +37,11 @@ public class BypassOperate extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
-    double scaler = (-m_throttle.getAsDouble() + 1);
-
-    // Interpret buttons
-    double x = 0;
-    // Pov returns -1 if not being pushed
-    if (m_pov.getAsInt() == 0) {x = 0.15;
-    } else if (m_pov.getAsInt() == 180) {x = -0.15;}
-
     m_manipulator.drive(
-      DeadZoneTuner.adjustForDeadzone(
-        m_jsY.getAsDouble(), 0.1, false
-      ) * scaler * 0.4,
-      x * scaler,
-      m_jsS.getAsDouble() * 0.08 * scaler,
-      true
+      m_arm.getAsDouble() * 0.4,
+      m_winch.getAsDouble() * 0.2,
+      m_wrist.getAsDouble() * 0.08,
+      false
     );
   }
 
