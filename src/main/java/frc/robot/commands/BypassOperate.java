@@ -45,7 +45,7 @@ public class BypassOperate extends CommandBase {
   @Override
   public void execute() {
 
-    double scaler = (m_throttle.getAsDouble() + 1);
+    double scaler = (-m_throttle.getAsDouble() + 1);
 
     // Interpret buttons
     double x = 0;
