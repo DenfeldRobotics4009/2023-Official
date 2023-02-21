@@ -215,8 +215,8 @@ public class RobotContainer {
           m_drivetrainSubsystem, 
           PathPlanner.loadPath(
             "1ConeClimb1", 
-            3.6576, 
-            0.5)
+            1, 
+            1)
         );
 
       default:

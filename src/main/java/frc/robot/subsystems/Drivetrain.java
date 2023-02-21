@@ -143,7 +143,7 @@ public class Drivetrain extends SubsystemBase {
 
       double tmps = states[i].speedMetersPerSecond;
 
-      if (Math.abs(optimizedCorrection[0]) > Constants.DRIVE_TOLERANCE) {tmps = 0;}
+      //if (Math.abs(optimizedCorrection[0]) > Constants.DRIVE_TOLERANCE) {tmps = 0;}
 
       double errorOffset = calculateErrorOffset(
         i, (tmps / MAX_VELOCITY_METERS_PER_SECOND)
