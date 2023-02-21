@@ -39,7 +39,7 @@ public class DefaultOperate extends CommandBase {
   @Override
   public void execute() {
     m_manipulator.drive(
-      m_arm.getAsDouble() * 0.4,
+      DeadZoneTuner.adjustForDeadzone(m_arm.getAsDouble() * 0.4, 0.16, false),
       m_winch.getAsDouble() * 0.2,
       m_wrist.getAsDouble() * 0.08,
       false

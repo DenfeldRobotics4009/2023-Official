@@ -121,8 +121,11 @@ public class Drivetrain extends SubsystemBase {
   }
 
   void p_drive(SwerveModuleState... states) {
+
+    // TODO this block is VERY undocumented, IDK what it does, or how it does it!
+
     for (int i = 0; i < states.length; i++) {
-      // double encReadResult = (
+      // double encReadResult = (w
       //   ((a_mTencoder[i].getPosition() * 360 * mTctrlr_mFactor[i] + mTctrlr_mAdditive[i]) 
       // ) / Constants.MK4I_STEER_RATIO) % (360); // 360 % 360 = 0
       double encReadResult = (

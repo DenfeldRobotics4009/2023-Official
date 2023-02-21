@@ -4,30 +4,15 @@
 
 package frc.robot.commands;
 
-import java.util.function.DoubleSupplier;
-import java.util.function.IntSupplier;
-
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.libraries.DeadZoneTuner;
 import frc.robot.subsystems.Arm;
 
-public class BypassOperate extends CommandBase {
-  Arm m_manipulator;
-  DoubleSupplier m_arm, m_winch, m_wrist;
-  /** Creates a new DefaultPitch. */
-  public BypassOperate(
-    Arm manipulator,
-
-    DoubleSupplier arm,
-    DoubleSupplier winch,
-    DoubleSupplier wrist
-  ) {
+public class Reset extends CommandBase {
+  Arm m_arm;
+  /** Creates a new Reset. */
+  public Reset(Arm arm) {
+    addRequirements(arm);
     m_arm = arm;
-    m_winch = winch;
-    m_wrist = wrist;
-
-    m_manipulator = manipulator;
-    addRequirements(manipulator);
   }
 
   // Called when the command is initially scheduled.
@@ -37,12 +22,9 @@ public class BypassOperate extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_manipulator.drive(
-      DeadZoneTuner.adjustForDeadzone(m_arm.getAsDouble() * 0.4, 0.16, false),
-      m_winch.getAsDouble() * 0.2,
-      m_wrist.getAsDouble() * 0.08,
-      true
-    );
+    m_arm.mC_arm.idealPosition = 1;
+    m_arm.mC_wrist.idealPosition = 0.1;
+    m_arm.mC_winch.idealPosition = 0.1;
   }
 
   // Called once the command ends or is interrupted.
@@ -52,6 +34,6 @@ public class BypassOperate extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return true;
   }
 }

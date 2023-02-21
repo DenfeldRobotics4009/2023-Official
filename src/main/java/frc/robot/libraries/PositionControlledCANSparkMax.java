@@ -113,12 +113,10 @@ public class PositionControlledCANSparkMax {
         EntryPos.setDouble(m_Encoder.getPosition());
 
         if (maxEPos != 0 && minEPos != 0) {
-            if (m_Encoder.getPosition() >= maxEPos && s > 0) {
-                s = 0; 
+            if (m_Encoder.getPosition() >= maxEPos || idealPosition >= maxEPos && s > 0) {
                 LimitMax();
             }
-            else if (m_Encoder.getPosition() <= minEPos && s < 0) {
-                s = 0; 
+            else if (m_Encoder.getPosition() <= minEPos || idealPosition <= minEPos && s < 0) {
                 LimitMin();
             }
         }

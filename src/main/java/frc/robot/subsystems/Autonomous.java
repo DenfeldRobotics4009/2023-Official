@@ -5,6 +5,8 @@
 package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.libraries.PIDController;
@@ -17,7 +19,6 @@ public class Autonomous extends SubsystemBase {
 
   double meanDriveRotations, m_thetaDegreesTurnDelta;
 
-  // TODO Tune!
   PIDController 
     driveController = new PIDController(0.1, 0, 0, 0), 
     turnController = new PIDController(0.1, 0, 0, 0);
@@ -31,45 +32,6 @@ public class Autonomous extends SubsystemBase {
     m_driveTrain = m_DrivetrainSubsystem;
 
     turnController.setTarget(0);
-  }
-
-  /**
-   * Updates meanDriveRotations via sum of quarter of each drive motor
-   */
-  void updateMeanDriveRotations() {
-    meanDriveRotations = 0;
-    for (int i = 0; i < 4; i++) {
-      meanDriveRotations += m_driveTrain.a_mencoder[i].getPosition() / 4;
-    }
-
-  }
-
-  /**
-   * Sets the goal values for the turn function
-   * 
-   * @param thetaDegreesDelta degrees to turn relative to current direction
-   * @param speed The speed (from -1 to 1) to travel
-   * 
-   * @returns self for chaining
-   */ 
-  public Autonomous setTurnGoal(double thetaDegreesDelta) {
-    m_thetaDegreesTurnDelta = thetaDegreesDelta;
-
-    return this;
-  }
-
-  /**
-   * @param distanceTolerance
-   * @param speed
-   * @return jsZ value to turn
-   */
-  double turn(double speed) {
-
-    turnController.setInput(
-      calcDistCorrection(m_thetaDegreesTurnDelta, navxGyro.getAngle())
-    );
-
-    return turnController.calculate(speed, -speed);
   }
 
   /**

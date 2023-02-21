@@ -4,11 +4,15 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.PathPlanner;
+
 // glory to felix the helix
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -21,10 +25,12 @@ import frc.robot.commands.LoadingStationDistanceDrive;
 import frc.robot.commands.OuttakeCone;
 import frc.robot.commands.OuttakeCube;
 import frc.robot.commands.PovDrive;
+import frc.robot.commands.Reset;
 import frc.robot.commands.TogglePipeline;
 import frc.robot.commands.WristGoto;
 import frc.robot.commands.AimTowardsTarget;
 import frc.robot.commands.ArmGoto;
+import frc.robot.commands.AutoCommand;
 import frc.robot.commands.BypassOperate;
 import frc.robot.commands.Calibrate;
 import frc.robot.subsystems.Autonomous;
@@ -40,6 +46,9 @@ import frc.robot.subsystems.Arm;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+
+  SendableChooser<Integer> autoChooser = new SendableChooser<>();
+
   // The robot's subsystems and commands are defined here...
   private final Drivetrain m_drivetrainSubsystem = new Drivetrain();
 
@@ -76,6 +85,11 @@ public class RobotContainer {
       )
     );
 
+    // Why call it object, when its an int?
+    autoChooser.addOption("None", 0);
+    autoChooser.addOption("SingleConeClimb A", 1);
+    SmartDashboard.putData("Autonomous", autoChooser);
+    
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -162,8 +176,8 @@ public class RobotContainer {
      * .and(o1.negate()) Makes the command require the trigger to not be
      * pressed to function. Thus, the trigger can act as a function key
      */
-    o9.and(o10).and(o1.negate()).onFalse(new Calibrate(m_manipulator));
-    o9.and(o10).and(o1.negate()).whileTrue(
+    o10.and(o1.negate()).onFalse(new Calibrate(m_manipulator));
+    o10.and(o1.negate()).whileTrue(
       new BypassOperate(
         m_manipulator, 
         () -> m_jsOperator.getRawAxis(2),
@@ -171,6 +185,8 @@ public class RobotContainer {
         () -> m_jsOperator.getRawAxis(1)
       )
     );
+
+    o8.onTrue(new Reset(m_manipulator));
 
     o5.and(o2.negate()).whileTrue(new WristGoto(m_manipulator, () -> Constants.WristCubeIntakeRot));
     o6.and(o2.negate()).whileTrue(new WristGoto(m_manipulator, () -> Constants.WristConeFlipRot));
@@ -192,8 +208,19 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand() {
-    // An ExampleCommand will run in autonomous
-    return new InstantCommand();
+  public Command getAutonomousCommand() {    
+    switch (autoChooser.getSelected()) {
+      case 1:
+        return new AutoCommand(
+          m_drivetrainSubsystem, 
+          PathPlanner.loadPath(
+            "1ConeClimb1", 
+            3.6576, 
+            0.5)
+        );
+
+      default:
+        return new InstantCommand(); // Does nothing
+    }
   }
 }
