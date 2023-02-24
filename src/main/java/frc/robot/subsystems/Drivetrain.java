@@ -49,7 +49,7 @@ public class Drivetrain extends SubsystemBase {
   final double[] mTctrlr_mAdditive = {0,0,0,0};
 
   // Var
-  double[] recursiveError = {0.0,0.0,0.0,0.0};
+  public double[] recursiveError = {0.0,0.0,0.0,0.0};
   double jsZ, jsX, jsY; 
 
   // Creating object arrays, ik its a mess but expand things out as needed!
@@ -143,7 +143,9 @@ public class Drivetrain extends SubsystemBase {
 
       double tmps = states[i].speedMetersPerSecond;
 
-      //if (Math.abs(optimizedCorrection[0]) > Constants.DRIVE_TOLERANCE) {tmps = 0;}
+      SmartDashboard.putNumber("MetersPerSecond", tmps);
+
+        if (Math.abs(optimizedCorrection[0]) > Constants.DRIVE_TOLERANCE) {tmps = 0;}
 
       double errorOffset = calculateErrorOffset(
         i, (tmps / MAX_VELOCITY_METERS_PER_SECOND)
@@ -167,8 +169,8 @@ public class Drivetrain extends SubsystemBase {
     a_dpid[i].setInput(E);
 
     recursiveError[i] += a_dpid[i].calculate(admax, admin); 
-    recursiveError[i] = clamp(-MAX_VOLTAGE, MAX_VOLTAGE, recursiveError[i]);
-    return clamp(-MAX_VOLTAGE, MAX_VOLTAGE, setSpeed + recursiveError[i] );
+    recursiveError[i] = clamp(recursiveError[i], MAX_VOLTAGE, -MAX_VOLTAGE);
+    return clamp(setSpeed + recursiveError[i], MAX_VOLTAGE, -MAX_VOLTAGE );
   }
 
   public static double clamp(double in, double max, double min) {
@@ -199,6 +201,9 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Recursive R1", recursiveError[1]);
     SmartDashboard.putNumber("Recursive L2", recursiveError[2]);
     SmartDashboard.putNumber("Recursive R2", recursiveError[3]);
+
+    SmartDashboard.putNumber("JsY", jsY);
+    SmartDashboard.putNumber("JsX", jsX);
 
     // Pull wheel values from kinematics object
     SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(new ChassisSpeeds(jsX, jsY, jsZ));

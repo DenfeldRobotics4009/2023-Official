@@ -20,13 +20,13 @@ public final class Constants {
      *
      * Should be measured from center to center.
      */
-    public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.65405;
+    public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.57785;
     /**
      * The front-to-back distance between the drivetrain wheels.
      *
      * Should be measured from center to center.
      */
-    public static final double DRIVETRAIN_WHEELBASE_METERS = 0.57785;
+    public static final double DRIVETRAIN_WHEELBASE_METERS = 0.65405;
 
     /**
      * The maximum voltage that will be delivered to the drive motors.
@@ -36,13 +36,21 @@ public final class Constants {
     /**
      * FIXME  Measure the drivetrain's maximum velocity or calculate the theoretical.
      * 
-     * The maximum velocity of the robot in meters per second. BASE 5880.0
+     * The maximum velocity of the robot in meters per second. 
      * <p>
      * This is a measure of how fast the robot should be able to drive in a straight line.
      */
-    public static final double MAX_VELOCITY_METERS_PER_SECOND = 100.0 / 60.0 *
-            SdsModuleConfigurations.MK4_L1.getDriveReduction() *
-            SdsModuleConfigurations.MK4_L1.getWheelDiameter() * Math.PI;
+    public static final double MAX_VELOCITY_METERS_PER_SECOND = 3.7576;//3.6576; // Theoretical
+    
+    public static final double ROTATIONS_TO_METERS = 0.03793762588; // r * this = meters
+
+            // 100.0 / 60.0 *
+            // SdsModuleConfigurations.MK4_L1.getDriveReduction() *
+            // SdsModuleConfigurations.MK4_L1.getWheelDiameter() * Math.PI;
+
+    // // For auto, maximum meters per second input to drive motors
+    // public static final double AUTO_MAXIMUM_METERS_PER_SECOND = 0.059;
+
     /**
      * Here we calculate the theoretical maximum angular velocity. You can also replace this with a measured amount.
      * The maximum angular velocity of the robot in radians per second.
@@ -58,7 +66,7 @@ public final class Constants {
      * The maxmimum angle the current wheel angle can be from the target 
      * to allow drive motors to engage.
      */
-    public static final double DRIVE_TOLERANCE = 45; // Degrees
+    public static final double DRIVE_TOLERANCE = 80; // Degrees
 
     public static final int MAX_NEO_RPM = 5676;
 
@@ -77,6 +85,8 @@ public final class Constants {
     public static final int R2DM_ = 24; 
     public static final int R2SM_ = 34; 
     public static final int R2SE_ = 3;
+
+    public static final int PneumaticHubID = 60;
 
     public static final double L1SMagnetOffset = -73.5;
     public static final double R1SMagnetOffset = 3;

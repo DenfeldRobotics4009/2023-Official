@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
 
 // glory to felix the helix
 
@@ -17,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DefaultDrive;
 import frc.robot.commands.DefaultOperate;
 import frc.robot.commands.IntakeCone;
@@ -25,9 +27,12 @@ import frc.robot.commands.LoadingStationDistanceDrive;
 import frc.robot.commands.OuttakeCone;
 import frc.robot.commands.OuttakeCube;
 import frc.robot.commands.PovDrive;
+import frc.robot.commands.RequestCone;
+import frc.robot.commands.RequestCube;
 import frc.robot.commands.Reset;
 import frc.robot.commands.TogglePipeline;
 import frc.robot.commands.WristGoto;
+import frc.robot.libraries.DeadZoneTuner;
 import frc.robot.commands.AimTowardsTarget;
 import frc.robot.commands.ArmGoto;
 import frc.robot.commands.AutoCommand;
@@ -36,6 +41,7 @@ import frc.robot.commands.Calibrate;
 import frc.robot.subsystems.Autonomous;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.LED;
 import frc.robot.subsystems.LimelightServer;
 import frc.robot.subsystems.Arm;
 
@@ -58,6 +64,8 @@ public class RobotContainer {
   private final Autonomous m_autoSubsystem = new Autonomous(m_drivetrainSubsystem);
 
   private final LimelightServer m_limeLight = new LimelightServer();
+  
+  private final LED m_led = new LED();
 
   private final Joystick m_jsDriver = new Joystick(0);
   private final Joystick m_jsOperator = new Joystick(1);
@@ -70,9 +78,18 @@ public class RobotContainer {
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDrive(
             m_drivetrainSubsystem,
             () -> m_jsDriver.getTrigger(),
-            () -> m_jsDriver.getX() * Constants.MAX_VELOCITY_METERS_PER_SECOND,
-            () -> m_jsDriver.getY() * Constants.MAX_VELOCITY_METERS_PER_SECOND,
-            () -> m_jsDriver.getZ() * Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
+
+            () -> DeadZoneTuner.adjustForDeadzone(
+              m_jsDriver.getX(), 0.15, false
+            ) * Constants.MAX_VELOCITY_METERS_PER_SECOND,
+
+            () -> DeadZoneTuner.adjustForDeadzone(
+              m_jsDriver.getY(), 0.15, false
+            ) * Constants.MAX_VELOCITY_METERS_PER_SECOND,
+            
+            () -> DeadZoneTuner.adjustForDeadzone(
+              m_jsDriver.getZ(), 0.15, false
+            ) * Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
     ));
 
     
@@ -87,7 +104,9 @@ public class RobotContainer {
 
     // Why call it object, when its an int?
     autoChooser.addOption("None", 0);
-    autoChooser.addOption("SingleConeClimb A", 1);
+    autoChooser.setDefaultOption("SingleConeClimb A", 1);
+    autoChooser.addOption("Help", 2);
+
     SmartDashboard.putData("Autonomous", autoChooser);
     
     // Configure the button bindings
@@ -139,6 +158,9 @@ public class RobotContainer {
     dpov0.or(dpov45.or(dpov90.or(dpov135.or(dpov180.or(dpov225.or(dpov270.or(dpov315))))))).whileTrue(
       new PovDrive(m_drivetrainSubsystem, speed, () -> m_jsDriver.getPOV())
     );
+
+    d4.toggleOnTrue(new RequestCube(m_led));
+    d6.toggleOnTrue(new RequestCone(m_led));
     
     d3.onTrue(new TogglePipeline());
     d2.whileTrue(
@@ -153,11 +175,23 @@ public class RobotContainer {
       new LoadingStationDistanceDrive(
           m_drivetrainSubsystem,
           () -> m_jsDriver.getTrigger(),
-          () -> m_jsDriver.getX() * Constants.MAX_VELOCITY_METERS_PER_SECOND,
-          () -> m_jsDriver.getY() * Constants.MAX_VELOCITY_METERS_PER_SECOND,
-          () -> m_jsDriver.getZ() * Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
+
+          () -> DeadZoneTuner.adjustForDeadzone(
+            m_jsDriver.getX(), 0.15, false
+          ) * Constants.MAX_VELOCITY_METERS_PER_SECOND,
+
+          () -> DeadZoneTuner.adjustForDeadzone(
+            m_jsDriver.getY(), 0.15, false
+          ) * Constants.MAX_VELOCITY_METERS_PER_SECOND,
+          
+          () -> DeadZoneTuner.adjustForDeadzone(
+            m_jsDriver.getZ(), 0.15, false
+          ) * Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
         )
     );
+
+    // TESTING PLEASE REMOVE OMG, IF THIS RUNS WHEN ITS NOT SUPPOSED TO HELL WILL RISE
+    d12.onTrue(getAutonomousCommand());
 
     JoystickButton o1 = new JoystickButton(m_jsOperator, 1);
     JoystickButton o2 = new JoystickButton(m_jsOperator, 2);
@@ -210,13 +244,22 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {    
     switch (autoChooser.getSelected()) {
+
       case 1:
+        PathPlannerTrajectory m_path = PathPlanner.loadPath(
+          "1ConeClimb1", 2, 2);
+
         return new AutoCommand(
           m_drivetrainSubsystem, 
-          PathPlanner.loadPath(
-            "1ConeClimb1", 
-            1, 
-            1)
+          m_path
+          // // Marker 1
+          // ,new AutoCommand.EventMarkerSet(
+          //   m_path.getMarkers().get(0), 
+          //   new ArmGoto(m_manipulator, () -> Constants.ConePlace2Rot),
+          //   new AutoCommand.EventMarkerCommandMode.OnTrue(),
+          //   2,
+          //   2
+          // )
         );
 
       default:

@@ -73,31 +73,16 @@ public class LoadingStationDistanceDrive extends CommandBase {
 
         if (distance == -1) {
           m_drivetrainSubsystem.drive(
-              DeadZoneTuner.adjustForDeadzone(
-                  m_rotationSupplier.getAsDouble() * pidTurnOut, 
-                  0.20 * Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-                  false),
-              DeadZoneTuner.adjustForDeadzone(
-                  m_translationXSupplier.getAsDouble() * pidOut, 
-                  0.05 * Constants.MAX_VELOCITY_METERS_PER_SECOND, 
-                  false),
-              DeadZoneTuner.adjustForDeadzone(
-                  m_translationYSupplier.getAsDouble() * pidOut, 
-                  0.1 * Constants.MAX_VELOCITY_METERS_PER_SECOND, 
-                  false)
+              m_rotationSupplier.getAsDouble() * pidTurnOut,
+              m_translationXSupplier.getAsDouble() * pidOut,
+              m_translationYSupplier.getAsDouble() * pidOut
           );
         } else {
           DriveController.setInput(distance);
 
           m_drivetrainSubsystem.drive(
-              DeadZoneTuner.adjustForDeadzone(
-                  m_rotationSupplier.getAsDouble() * pidTurnOut, 
-                  0.20 * Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-                  false),
-              DeadZoneTuner.adjustForDeadzone(
-                  m_translationXSupplier.getAsDouble() * pidOut, 
-                  0.05 * Constants.MAX_VELOCITY_METERS_PER_SECOND, 
-                  false),
+              m_rotationSupplier.getAsDouble() * pidTurnOut,
+              m_translationXSupplier.getAsDouble() * pidOut,
               DriveController.calculate(
                 Constants.MAX_VELOCITY_METERS_PER_SECOND, 
                 -Constants.MAX_VELOCITY_METERS_PER_SECOND
