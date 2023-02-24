@@ -82,6 +82,10 @@ public class AutoCommand extends CommandBase {
    */
   public static class EventMarkerSet{
     /**
+     * If false, marker set will cease to function
+     */
+    public boolean allowOperation = true;
+    /**
      * Pathplanner marker, holds command run time
      */
     public EventMarker kEventMarker;
@@ -211,32 +215,20 @@ public class AutoCommand extends CommandBase {
     // Extract speeds from state, thus allowing them to be set to 0
     double MetersPerSecond = m_state.velocityMetersPerSecond;
     double RadPerSecond = m_state.angularVelocityRadPerSec;
+
     //Parse through marker set
+    boolean Event = false; // Whether an event is active
     for (EventMarkerSet markerSet : m_EventMarkerSetArr) {
       /**
        * Alternate time records how long
        * path time has been paused
        */
-      boolean Event = false;
-      // Check to schedule command
-      if (
-        // Poll via user defined method via interface
-        markerSet.kOperationMode.poll(
-          m_pathTimer.get() >= markerSet.kEventMarker.timeSeconds
-          && m_altTimer.get() < markerSet.kWindowSeconds
-        )
-      ) {
-        /**
-         * Schedule command if the time has passed marker schedule time,
-         * and time is under the window limit.
-         */
-        markerSet.kCommand.schedule();
-      }
 
       // Check to pause path
       if (
         m_pathTimer.get() >= markerSet.kEventMarker.timeSeconds
         && m_altTimer.get() < markerSet.kDelaySeconds
+        && markerSet.allowOperation
       ) {
         Event = true;
 
@@ -247,16 +239,44 @@ public class AutoCommand extends CommandBase {
         m_altTimer.start();
         m_pathTimer.stop();
       }
-      // Repeat check for all markers
 
-      /**
-       * If no event is active, reset alt timer
-       */
-      if (!Event) {
-        m_altTimer.reset();
-        m_altTimer.stop();
+      // Check to schedule command
+      if (
+        // Poll via user defined method via interface
+        markerSet.kOperationMode.poll(
+          m_pathTimer.get() >= markerSet.kEventMarker.timeSeconds
+          && m_altTimer.get() < markerSet.kWindowSeconds
+          && markerSet.allowOperation
+        )
+      ) {
+        /**
+         * Schedule command if the time has passed marker schedule time,
+         * and time is under the window limit.
+         */
+        markerSet.kCommand.schedule();
       }
+
+      // Stop command from firing again
+      if (
+        m_altTimer.get() >= markerSet.kDelaySeconds
+        && m_pathTimer.get() >= markerSet.kEventMarker.timeSeconds
+      ) {
+        markerSet.allowOperation = false;
+      }
+
+      // Repeat check for all markers
     } // end for loop
+    /**
+     * If no event is active, reset alt timer
+     */
+    if (!Event) {
+      m_pathTimer.start();
+      m_altTimer.stop();
+      m_altTimer.reset();
+    }
+
+    SmartDashboard.putBoolean("Event Running", Event);
+    SmartDashboard.putNumber("Alt Timer", m_altTimer.get());
 
     // Extract states, invert, and drive.
     // Inverting inputs makes the robot drive forward
@@ -293,7 +313,7 @@ public class AutoCommand extends CommandBase {
     ) - initialDistanceSample;
 
     SmartDashboard.putNumber(
-      "Travelled Auto Distance", travelDist / Constants.ROTATIONS_TO_METERS
+      "Travelled Auto Distance", travelDist * Constants.ROTATIONS_TO_METERS
     );
     
   }

@@ -252,13 +252,20 @@ public class RobotContainer {
         return new AutoCommand(
           m_drivetrainSubsystem, 
           m_path
-          // // Marker 1
+          // Marker 1
           // ,new AutoCommand.EventMarkerSet(
-          //   m_path.getMarkers().get(0), 
+          //   m_path.getMarkers().get(0),
           //   new ArmGoto(m_manipulator, () -> Constants.ConePlace2Rot),
           //   new AutoCommand.EventMarkerCommandMode.OnTrue(),
           //   2,
-          //   2
+          //   1
+          // ),
+          // new AutoCommand.EventMarkerSet(
+          //   m_path.getMarkers().get(1), 
+          //   new ArmGoto(m_manipulator, () -> 0),
+          //   new AutoCommand.EventMarkerCommandMode.OnTrue(),
+          //   2,
+          //   1
           // )
         );
 
