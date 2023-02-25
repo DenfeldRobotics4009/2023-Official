@@ -17,7 +17,7 @@ import frc.robot.subsystems.LimelightServer;
 public class AimTowardsTarget extends CommandBase {
   Autonomous m_auto;
 
-  PIDController TurnController = new PIDController(0.0025, 0, 0.00025, 0);
+  PIDController TurnController = new PIDController(0.05, 0, 0.00025, 0);
   PIDController DriveController = new PIDController(0.04, 0, 0, 0);
 
   DoubleSupplier m_translationYSupplier, m_translationXSupplier;
@@ -65,7 +65,7 @@ public class AimTowardsTarget extends CommandBase {
       // Negative, as this is to calculate which way to turn to turn towards the target.
       -LimelightServer.tx.getDouble(0), 
       TurnController, 
-      0.5,
+      2,
 
       // Supply standard jsx and jsy for driving while aiming
       DeadZoneTuner.adjustForDeadzone(

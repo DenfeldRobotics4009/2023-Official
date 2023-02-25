@@ -74,37 +74,101 @@ public class AutoCommand extends CommandBase {
     }
   }
 
+  public interface AutoScheduledCommand {
+    /**
+     * 
+     * @return
+     */
+    public Command getCommand();
+    /**
+     * 
+     * @return
+     */
+    public boolean getOperationAllow();
+
+    public void setOperationAllow(boolean in);
+    /**
+     * 
+     * @return
+     */
+    public EventMarker getEventMarker();
+    /**
+     * 
+     * @return
+     */
+    public CommandScheduleMode getOperationMode();
+    /**
+     * 
+     * @return
+     */
+    public double getWindow();
+    /**
+     * 
+     * @return
+     */
+    public double getDelay();
+  }
+
   /**
    * Pairs a pathPlanner event marker with a 
    * command, and run information
    * 
    * This class functions as a struct
    */
-  public static class EventMarkerSet{
+  public static class EventMarkerSet implements AutoScheduledCommand{
     /**
      * If false, marker set will cease to function
      */
     public boolean allowOperation = true;
+    @Override
+    public boolean getOperationAllow() {
+      return allowOperation;
+    }
+    @Override
+    public void setOperationAllow(boolean in) {
+      allowOperation = in;
+    }
     /**
      * Pathplanner marker, holds command run time
      */
     public EventMarker kEventMarker;
+    @Override
+    public EventMarker getEventMarker() {
+      return kEventMarker;
+    }
     /**
      * Command to run
      */
     public Command kCommand;
+    @Override
+    public Command getCommand() {
+      return kCommand;
+    }
     /**
      * Method to run the command
      */
     public CommandScheduleMode kOperationMode;
+    @Override
+    public CommandScheduleMode getOperationMode() {
+      return kOperationMode;
+    }
+    
     /**
      * How long to poll the command
      */
     public double kWindowSeconds;
+    @Override
+    public double getWindow() {
+      return kWindowSeconds;
+    }
     /**
      * How long to delay path planner path
      */
     public double kDelaySeconds;
+    @Override
+    public double getDelay() {
+      return kDelaySeconds;
+    }
     /**
      * Binds a pathplanner marker, and command together.
      * 
@@ -139,6 +203,87 @@ public class AutoCommand extends CommandBase {
     public EventMarkerSet() {}
   }
 
+  public static class TimerScheduledCommand implements AutoScheduledCommand {
+
+    /**
+     * If false, marker set will cease to function
+     */
+    public boolean allowOperation = true;
+    @Override
+    public boolean getOperationAllow() {
+      return allowOperation;
+    }
+    @Override
+    public void setOperationAllow(boolean in) {
+      allowOperation = in;
+    }
+    // Not used
+    @Override
+    public EventMarker getEventMarker() {
+      return null;
+    }
+    /**
+     * Command to run
+     */
+    public Command kCommand;
+    @Override
+    public Command getCommand() {
+      return kCommand;
+    }
+    /**
+     * Method to run the command
+     */
+    public CommandScheduleMode kOperationMode;
+    @Override
+    public CommandScheduleMode getOperationMode() {
+      return kOperationMode;
+    }
+    
+    /**
+     * How long to poll the command
+     */
+    public double kWindowSeconds;
+    @Override
+    public double getWindow() {
+      return kWindowSeconds;
+    }
+    /**
+     * How long to delay path planner path
+     */
+    public double kDelaySeconds;
+    @Override
+    public double getDelay() {
+      return kDelaySeconds;
+    }
+    /**
+     * Binds a pathplanner marker, and command together.
+     *      * 
+     * @param command WPILib command
+     * 
+     * @param commandMode AutoCommand.EventMarkerCommandMode
+     * 
+     * @param operationWindowSeconds Time after auto start to run the command
+     */
+    public TimerScheduledCommand(
+      Command command,
+      CommandScheduleMode commandMode,
+      double operationWindowSeconds,
+      double delayWindowSeconds
+    ) {
+      kCommand = command;
+
+      kOperationMode = commandMode;
+
+      kWindowSeconds = operationWindowSeconds;
+
+      kDelaySeconds = delayWindowSeconds;
+    }
+    /**
+     * Binds a pathplanner marker, and command together.
+     */
+    public TimerScheduledCommand() {}
+  }
+
   public static ShuffleboardTab m_tab = Shuffleboard.getTab("Auto");
 
   public static GenericEntry 
@@ -157,15 +302,20 @@ public class AutoCommand extends CommandBase {
 
   PIDController distanceCorrectionController = new PIDController(0.1, 0, 0, 0);
 
-  Timer m_altTimer = new Timer(), m_pathTimer = new Timer();
+  /**
+   * 
+   */
+  Timer m_altTimer = new Timer(), m_pathTimer = new Timer(), m_mainTimer = new Timer();
 
   double timerOffset = 0;
+
+  Boolean reverseDrivePath = false;
 
   Drivetrain m_drive;
 
   PathPlannerTrajectory m_path;
 
-  EventMarkerSet[] m_EventMarkerSetArr;
+  AutoScheduledCommand[] m_EventMarkerSetArr;
 
   double initialDistanceSample = 0;
 
@@ -178,7 +328,8 @@ public class AutoCommand extends CommandBase {
   public AutoCommand(
     Drivetrain DriveSubsystem, 
     PathPlannerTrajectory PathPlannerPath,
-    EventMarkerSet... EventMarkerOperations
+    Boolean ReverseDrivePath,
+    AutoScheduledCommand... EventMarkerOperations
   ) {
     addRequirements(DriveSubsystem);
 
@@ -188,6 +339,8 @@ public class AutoCommand extends CommandBase {
 
     m_EventMarkerSetArr = EventMarkerOperations;
 
+    reverseDrivePath = ReverseDrivePath;
+
     // Error based pid
     distanceCorrectionController.setTarget(0);
   }
@@ -196,6 +349,7 @@ public class AutoCommand extends CommandBase {
   @Override
   public void initialize() {
     m_pathTimer.start();
+    m_mainTimer.start();
 
     // Sample encoders on startup
     initialDistanceSample = average(
@@ -218,52 +372,63 @@ public class AutoCommand extends CommandBase {
 
     //Parse through marker set
     boolean Event = false; // Whether an event is active
-    for (EventMarkerSet markerSet : m_EventMarkerSetArr) {
-      /**
-       * Alternate time records how long
-       * path time has been paused
-       */
+    for (AutoScheduledCommand markerSet : m_EventMarkerSetArr) {
 
-      // Check to pause path
-      if (
-        m_pathTimer.get() >= markerSet.kEventMarker.timeSeconds
-        && m_altTimer.get() < markerSet.kDelaySeconds
-        && markerSet.allowOperation
-      ) {
-        Event = true;
-
-        MetersPerSecond = 0;
-        RadPerSecond = 0;
-
-        // pause
-        m_altTimer.start();
-        m_pathTimer.stop();
-      }
-
-      // Check to schedule command
-      if (
-        // Poll via user defined method via interface
-        markerSet.kOperationMode.poll(
-          m_pathTimer.get() >= markerSet.kEventMarker.timeSeconds
-          && m_altTimer.get() < markerSet.kWindowSeconds
-          && markerSet.allowOperation
-        )
-      ) {
+      // check for pathplanner event marker
+      if (markerSet.getEventMarker() != null) {
         /**
-         * Schedule command if the time has passed marker schedule time,
-         * and time is under the window limit.
+         * Alternate time records how long
+         * path time has been paused
          */
-        markerSet.kCommand.schedule();
-      }
 
-      // Stop command from firing again
-      if (
-        m_altTimer.get() >= markerSet.kDelaySeconds
-        && m_pathTimer.get() >= markerSet.kEventMarker.timeSeconds
-      ) {
-        markerSet.allowOperation = false;
-      }
+        // Check to pause path
+        if (
+          m_pathTimer.get() >= markerSet.getEventMarker().timeSeconds
+          && m_altTimer.get() < markerSet.getDelay()
+          && markerSet.getOperationAllow()
+        ) {
+          Event = true;
 
+          MetersPerSecond = 0;
+          RadPerSecond = 0;
+
+          // pause
+          m_altTimer.start();
+          m_pathTimer.stop();
+        }
+
+        // Check to schedule command
+        if (
+          // Poll via user defined method via interface
+          markerSet.getOperationMode().poll(
+            m_pathTimer.get() >= markerSet.getEventMarker().timeSeconds
+            && m_altTimer.get() < markerSet.getWindow()
+            && markerSet.getOperationAllow()
+          )
+        ) {
+          /**
+           * Schedule command if the time has passed marker schedule time,
+           * and time is under the window limit.
+           */
+          markerSet.getCommand().schedule();
+        }
+
+        // Stop command from firing again
+        if (
+          m_altTimer.get() >= markerSet.getDelay()
+          && m_pathTimer.get() >= markerSet.getEventMarker().timeSeconds
+        ) {
+          markerSet.setOperationAllow(false);
+        }
+      } else { // No pathplanner marker is given, thus it must be a timer based command
+        // While true will constantly run the command after the timer reaches its goal
+        if (markerSet.getOperationMode().poll(
+          m_mainTimer.get() >= markerSet.getDelay()
+        )) {
+          // Run the command
+          markerSet.getCommand().schedule();
+        }
+      }
       // Repeat check for all markers
     } // end for loop
     /**
@@ -278,14 +443,18 @@ public class AutoCommand extends CommandBase {
     SmartDashboard.putBoolean("Event Running", Event);
     SmartDashboard.putNumber("Alt Timer", m_altTimer.get());
 
-    // Extract states, invert, and drive.
-    // Inverting inputs makes the robot drive forward
-    m_drive.drive(
-      -RadPerSecond, 
-      // This may be false, if it is, use m_state.holonomicRotation funny buiseness
-      0, // Zero, as PathPlanner always drives in the direction the robot is facing
-      -MetersPerSecond
-    );
+    double reverseFactor = (reverseDrivePath) ? (-1) : (1);
+
+    if (m_pathTimer.get() <= m_path.getTotalTimeSeconds()) {
+      // Extract states, invert, and drive.
+      // Inverting inputs makes the robot drive forward
+      m_drive.drive(
+        RadPerSecond * reverseFactor, 
+        // This may be false, if it is, use m_state.holonomicRotation funny buiseness
+        0, // Zero, as PathPlanner always drives in the direction the robot is facing
+        -MetersPerSecond * reverseFactor
+      );
+    }
 
     //m_drive.periodic();
 
@@ -333,6 +502,6 @@ public class AutoCommand extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return m_pathTimer.get() >= m_path.getTotalTimeSeconds();
+    return false;
   }
 }

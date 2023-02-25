@@ -40,9 +40,9 @@ public final class Constants {
      * <p>
      * This is a measure of how fast the robot should be able to drive in a straight line.
      */
-    public static final double MAX_VELOCITY_METERS_PER_SECOND = 1.8788;//3.6576; // Theoretical
+    public static final double MAX_VELOCITY_METERS_PER_SECOND = 3.6576;//3.6576; // Theoretical
     
-    public static final double ROTATIONS_TO_METERS = 0.03793762588; // r * this = meters
+    public static final double ROTATIONS_TO_METERS = 0.03793762588 * 2; // r * this = meters
 
             // 100.0 / 60.0 *
             // SdsModuleConfigurations.MK4_L1.getDriveReduction() *
@@ -113,7 +113,7 @@ public final class Constants {
     public static final double intakeSpeed = 0.3;
 
     // -20.5, 20.5 degrees
-    public static final double LimelightDegreesTarget = -13;
+    public static final double LimelightDegreesTarget = -14;
 
     public static final double WristCubeIntakeRot = -32;
     public static final double WristConeFlipRot = -36;

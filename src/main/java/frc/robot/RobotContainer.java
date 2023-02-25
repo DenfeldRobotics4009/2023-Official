@@ -24,18 +24,21 @@ import frc.robot.commands.DefaultOperate;
 import frc.robot.commands.IntakeCone;
 import frc.robot.commands.IntakeCube;
 import frc.robot.commands.LoadingStationDistanceDrive;
+import frc.robot.commands.ManipulatorGoto;
 import frc.robot.commands.OuttakeCone;
 import frc.robot.commands.OuttakeCube;
 import frc.robot.commands.PovDrive;
 import frc.robot.commands.RequestCone;
 import frc.robot.commands.RequestCube;
 import frc.robot.commands.Reset;
+import frc.robot.commands.StopIntake;
 import frc.robot.commands.TogglePipeline;
 import frc.robot.commands.WristGoto;
 import frc.robot.libraries.DeadZoneTuner;
 import frc.robot.commands.AimTowardsTarget;
 import frc.robot.commands.ArmGoto;
 import frc.robot.commands.AutoCommand;
+import frc.robot.commands.AutoLevel;
 import frc.robot.commands.BypassOperate;
 import frc.robot.commands.Calibrate;
 import frc.robot.subsystems.Autonomous;
@@ -154,7 +157,7 @@ public class RobotContainer {
     POVButton dpov270 = new POVButton(m_jsDriver, 270);
     POVButton dpov315 = new POVButton(m_jsDriver, 315);
 
-    double speed = 0.01;
+    double speed = 0.8;
     dpov0.or(dpov45.or(dpov90.or(dpov135.or(dpov180.or(dpov225.or(dpov270.or(dpov315))))))).whileTrue(
       new PovDrive(m_drivetrainSubsystem, speed, () -> m_jsDriver.getPOV())
     );
@@ -189,6 +192,8 @@ public class RobotContainer {
           ) * Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
         )
     );
+
+    d11.whileTrue(new AutoLevel(m_drivetrainSubsystem));
 
     // TESTING PLEASE REMOVE OMG, IF THIS RUNS WHEN ITS NOT SUPPOSED TO HELL WILL RISE
     d12.onTrue(getAutonomousCommand());
@@ -247,11 +252,49 @@ public class RobotContainer {
 
       case 1:
         PathPlannerTrajectory m_path = PathPlanner.loadPath(
-          "1ConeClimb1", 2, 2);
+          "1ConeClimb1", 2.3, 2);
 
         return new AutoCommand(
           m_drivetrainSubsystem, 
-          m_path
+          m_path,
+          true,
+
+          new AutoCommand.EventMarkerSet(
+            m_path.getMarkers().get(0), 
+            new ManipulatorGoto(
+              m_manipulator,
+              () -> -67.64, 
+              () -> 88.71, 
+              () -> -40.49), 
+            new AutoCommand.EventMarkerCommandMode.WhileTrue(), 
+            2, 
+            2),
+          
+          new AutoCommand.TimerScheduledCommand(
+            new OuttakeCone(m_intake), 
+            new AutoCommand.EventMarkerCommandMode.OnTrue(), 
+            0, 
+            1.5),
+          
+          new AutoCommand.TimerScheduledCommand(
+            new StopIntake(m_intake), 
+            new AutoCommand.EventMarkerCommandMode.OnTrue(), 
+            0, 
+            2.5),
+
+          new AutoCommand.EventMarkerSet(
+            m_path.getMarkers().get(1), 
+            new Reset(m_manipulator),
+            new AutoCommand.EventMarkerCommandMode.OnTrue(), 
+            1, 
+            0),
+
+          new AutoCommand.EventMarkerSet(
+            m_path.getMarkers().get(2), 
+            new AutoLevel(m_drivetrainSubsystem), 
+            new AutoCommand.EventMarkerCommandMode.WhileTrue(), 
+            5, 
+            0)
           // Marker 1
           // ,new AutoCommand.EventMarkerSet(
           //   m_path.getMarkers().get(0),
