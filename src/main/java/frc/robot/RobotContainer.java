@@ -82,6 +82,8 @@ public class RobotContainer {
             m_drivetrainSubsystem,
             () -> m_jsDriver.getTrigger(),
 
+            () -> m_jsDriver.getRawButton(8),
+
             () -> DeadZoneTuner.adjustForDeadzone(
               m_jsDriver.getX(), 0.15, false
             ) * Constants.MAX_VELOCITY_METERS_PER_SECOND,
@@ -108,7 +110,7 @@ public class RobotContainer {
     // Why call it object, when its an int?
     autoChooser.addOption("None", 0);
     autoChooser.setDefaultOption("SingleConeClimb A", 1);
-    autoChooser.addOption("Help", 2);
+    autoChooser.addOption("SingleCone A", 2);
 
     SmartDashboard.putData("Autonomous", autoChooser);
     
@@ -310,6 +312,46 @@ public class RobotContainer {
           //   2,
           //   1
           // )
+        );
+
+      case 2:
+        PathPlannerTrajectory m_path2 = PathPlanner.loadPath(
+          "1Cone1", 2.3, 2);
+
+        return new AutoCommand(
+          m_drivetrainSubsystem, 
+          m_path2,
+          true,
+
+          new AutoCommand.EventMarkerSet(
+            m_path2.getMarkers().get(0), 
+            new ManipulatorGoto(
+              m_manipulator,
+              () -> -67.64, 
+              () -> 88.71, 
+              () -> -39.49), 
+            new AutoCommand.EventMarkerCommandMode.WhileTrue(), 
+            2, 
+            2),
+          
+          new AutoCommand.TimerScheduledCommand(
+            new OuttakeCone(m_intake), 
+            new AutoCommand.EventMarkerCommandMode.OnTrue(), 
+            0, 
+            2.5),
+          
+          new AutoCommand.TimerScheduledCommand(
+            new StopIntake(m_intake), 
+            new AutoCommand.EventMarkerCommandMode.OnTrue(), 
+            0, 
+            3.8),
+
+          new AutoCommand.EventMarkerSet(
+            m_path2.getMarkers().get(1), 
+            new Reset(m_manipulator),
+            new AutoCommand.EventMarkerCommandMode.OnTrue(), 
+            1, 
+            0)
         );
 
       default:

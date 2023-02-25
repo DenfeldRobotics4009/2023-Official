@@ -16,7 +16,7 @@ public class DefaultDrive extends CommandBase {
     private final DoubleSupplier m_translationXSupplier;
     private final DoubleSupplier m_translationYSupplier;
     private final DoubleSupplier m_rotationSupplier;
-    private final BooleanSupplier m_PrecisionMode;
+    private final BooleanSupplier m_PrecisionMode, m_disableTurn;
 
     PIDController 
         factorController = new PIDController(0.2, 0, 0, 0),
@@ -26,9 +26,11 @@ public class DefaultDrive extends CommandBase {
 
     public DefaultDrive(Drivetrain drivetrainSubsystem,
                                BooleanSupplier precisionMode,
+                               BooleanSupplier disableTurn,
                                DoubleSupplier translationXSupplier,
                                DoubleSupplier translationYSupplier,
                                DoubleSupplier rotationSupplier) {
+        this.m_disableTurn = disableTurn;
         this.m_drivetrainSubsystem = drivetrainSubsystem;
         this.m_PrecisionMode = precisionMode;
         this.m_translationXSupplier = translationXSupplier;
@@ -60,10 +62,10 @@ public class DefaultDrive extends CommandBase {
         SmartDashboard.putNumber("pidOUt", pidOut);
         SmartDashboard.putNumber("pidTurnOUt", pidTurnOut);
 
-        
+        double turn = m_disableTurn.getAsBoolean() ? (0) : (1);
 
         m_drivetrainSubsystem.drive(
-            m_rotationSupplier.getAsDouble() * pidTurnOut,
+            m_rotationSupplier.getAsDouble() * pidTurnOut * turn,
             m_translationXSupplier.getAsDouble() * pidOut,
             m_translationYSupplier.getAsDouble() * pidOut
             // DeadZoneTuner.adjustForDeadzone(

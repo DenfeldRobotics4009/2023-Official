@@ -14,28 +14,39 @@ public class LED extends SubsystemBase {
   PneumaticHub m_hub = new PneumaticHub(Constants.PneumaticHubID);
 
   Solenoid 
-    led_yellow = m_hub.makeSolenoid(0),
-    led_purple = m_hub.makeSolenoid(1);
+    led_yellow1 = m_hub.makeSolenoid(0),
+    led_yellow2 = m_hub.makeSolenoid(1),
+
+    led_purple1 = m_hub.makeSolenoid(3),
+    led_purple2 = m_hub.makeSolenoid(15);
 
   /** Creates a new LED. */
   public LED() {
-    led_yellow.set(false);
-    led_purple.set(false);
+    led_yellow1.set(false);
+    led_purple1.set(false);
+    led_yellow2.set(false);
+    led_purple2.set(false);
   }
 
   public void requestCube() {
-    led_purple.set(true);
-    led_yellow.set(false);
+    led_yellow1.set(false);
+    led_purple1.set(true);
+    led_yellow2.set(false);
+    led_purple2.set(true);
   }
 
   public void requestCone() {
-    led_purple.set(false);
-    led_yellow.set(true);
+    led_yellow1.set(true);
+    led_purple1.set(false);
+    led_yellow2.set(true);
+    led_purple2.set(false);
   }
 
   public void off() {
-    led_purple.set(false);
-    led_yellow.set(false);
+    led_yellow1.set(false);
+    led_purple1.set(false);
+    led_yellow2.set(false);
+    led_purple2.set(false);
   }
 
   @Override
