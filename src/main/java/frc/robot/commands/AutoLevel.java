@@ -12,7 +12,7 @@ import frc.robot.subsystems.Drivetrain;
 public class AutoLevel extends CommandBase {
 
 
-  PIDController driveController = new PIDController(0.03, 0, 0.01, 0);
+  PIDController driveController = new PIDController(0.012, 0, 0.002, 0);
 
   Drivetrain m_drive;
   /** Creates a new AutoLevel. */

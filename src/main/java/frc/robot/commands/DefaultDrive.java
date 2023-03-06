@@ -2,11 +2,10 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Constants;
-import frc.robot.libraries.DeadZoneTuner;
 import frc.robot.libraries.PIDController;
 import frc.robot.subsystems.Drivetrain;
 
+import java.util.concurrent.locks.Lock;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
@@ -17,6 +16,7 @@ public class DefaultDrive extends CommandBase {
     private final DoubleSupplier m_translationYSupplier;
     private final DoubleSupplier m_rotationSupplier;
     private final BooleanSupplier m_PrecisionMode, m_disableTurn;
+
 
     PIDController 
         factorController = new PIDController(0.2, 0, 0, 0),
@@ -29,7 +29,8 @@ public class DefaultDrive extends CommandBase {
                                BooleanSupplier disableTurn,
                                DoubleSupplier translationXSupplier,
                                DoubleSupplier translationYSupplier,
-                               DoubleSupplier rotationSupplier) {
+                               DoubleSupplier rotationSupplier                          
+                               ) {
         this.m_disableTurn = disableTurn;
         this.m_drivetrainSubsystem = drivetrainSubsystem;
         this.m_PrecisionMode = precisionMode;
@@ -49,7 +50,7 @@ public class DefaultDrive extends CommandBase {
 
         // PID target will always be 0, so we read the rror
         double target = (m_PrecisionMode.getAsBoolean()) ? 0.5 : 1;
-        double turntarget = (m_PrecisionMode.getAsBoolean()) ? 0.5 : 0.75;
+        double turntarget = (m_PrecisionMode.getAsBoolean()) ? 0.35 : 0.75;
         // Set error as the input
         factorController.setInput(pidOut-(target));
         factorTurnController.setInput(pidTurnOut-(turntarget));
@@ -62,7 +63,7 @@ public class DefaultDrive extends CommandBase {
         SmartDashboard.putNumber("pidOUt", pidOut);
         SmartDashboard.putNumber("pidTurnOUt", pidTurnOut);
 
-        double turn = m_disableTurn.getAsBoolean() ? (0) : (1);
+        double turn = m_disableTurn.getAsBoolean() ? (0) : (0.8);
 
         m_drivetrainSubsystem.drive(
             m_rotationSupplier.getAsDouble() * pidTurnOut * turn,

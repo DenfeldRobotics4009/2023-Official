@@ -97,5 +97,7 @@ public class Arm extends SubsystemBase {
   @Override
   public void periodic() {
     mC_wrist.Update();
+
+    SmartDashboard.putNumber("Dist", distSensor.GetRange());
   }
 }

@@ -76,36 +76,37 @@ public class AutoCommand extends CommandBase {
 
   public interface AutoScheduledCommand {
     /**
-     * 
-     * @return
+     * @return Command to schedule
      */
     public Command getCommand();
     /**
-     * 
-     * @return
+     * @return True if the command should run
      */
     public boolean getOperationAllow();
-
+    /**
+     * @param in True to allow the command to run
+     */
     public void setOperationAllow(boolean in);
     /**
-     * 
-     * @return
+     * @return the Path Planner event marker
      */
     public EventMarker getEventMarker();
     /**
-     * 
-     * @return
+     * @return CommandScheduleMode object
      */
     public CommandScheduleMode getOperationMode();
     /**
-     * 
-     * @return
+     * @return Seconds to run the function
      */
     public double getWindow();
     /**
      * 
-     * @return
+     * @return Seconds to pause Path Planner, or
+     * if getEventMarker is null; seconds
+     * after main timer start to run command
      */
+
+     
     public double getDelay();
   }
 
@@ -309,7 +310,7 @@ public class AutoCommand extends CommandBase {
 
   double timerOffset = 0;
 
-  Boolean reverseDrivePath = false;
+  Boolean reverseDrivePath = false, reverseTurning = false;
 
   Drivetrain m_drive;
 
@@ -318,6 +319,8 @@ public class AutoCommand extends CommandBase {
   AutoScheduledCommand[] m_EventMarkerSetArr;
 
   double initialDistanceSample = 0;
+
+  boolean PauseDrive = false;
 
   /**
    * 
@@ -329,6 +332,7 @@ public class AutoCommand extends CommandBase {
     Drivetrain DriveSubsystem, 
     PathPlannerTrajectory PathPlannerPath,
     Boolean ReverseDrivePath,
+    Boolean ReverseTurning,
     AutoScheduledCommand... EventMarkerOperations
   ) {
     addRequirements(DriveSubsystem);
@@ -340,6 +344,8 @@ public class AutoCommand extends CommandBase {
     m_EventMarkerSetArr = EventMarkerOperations;
 
     reverseDrivePath = ReverseDrivePath;
+
+    reverseTurning = ReverseTurning;
 
     // Error based pid
     distanceCorrectionController.setTarget(0);
@@ -410,7 +416,7 @@ public class AutoCommand extends CommandBase {
            * Schedule command if the time has passed marker schedule time,
            * and time is under the window limit.
            */
-          markerSet.getCommand().schedule();
+          markerSet.getCommand().execute();
         }
 
         // Stop command from firing again
@@ -423,10 +429,11 @@ public class AutoCommand extends CommandBase {
       } else { // No pathplanner marker is given, thus it must be a timer based command
         // While true will constantly run the command after the timer reaches its goal
         if (markerSet.getOperationMode().poll(
-          m_mainTimer.get() >= markerSet.getDelay()
+          m_mainTimer.get() >= markerSet.getDelay() 
+          && m_mainTimer.get() <= (markerSet.getDelay() + markerSet.getWindow())
         )) {
           // Run the command
-          markerSet.getCommand().schedule();
+          markerSet.getCommand().execute();
         }
       }
       // Repeat check for all markers
@@ -435,6 +442,7 @@ public class AutoCommand extends CommandBase {
      * If no event is active, reset alt timer
      */
     if (!Event) {
+      PauseDrive = false;
       m_pathTimer.start();
       m_altTimer.stop();
       m_altTimer.reset();
@@ -443,16 +451,20 @@ public class AutoCommand extends CommandBase {
     SmartDashboard.putBoolean("Event Running", Event);
     SmartDashboard.putNumber("Alt Timer", m_altTimer.get());
 
-    double reverseFactor = (reverseDrivePath) ? (-1) : (1);
+    double reverseDriveFactor = (reverseDrivePath) ? (-1) : (1);
 
-    if (m_pathTimer.get() <= m_path.getTotalTimeSeconds()) {
+    // Turning will need to be reverse when on red alliance side
+    double reverseTurnFactor = (reverseTurning) ? (-1) : (1);
+
+    if (m_pathTimer.get() <= m_path.getTotalTimeSeconds() && !PauseDrive) {
+      if (MetersPerSecond == 0 && RadPerSecond == 0) {PauseDrive = true;}
       // Extract states, invert, and drive.
       // Inverting inputs makes the robot drive forward
       m_drive.drive(
-        RadPerSecond * reverseFactor, 
+        -RadPerSecond * reverseDriveFactor * reverseTurnFactor, 
         // This may be false, if it is, use m_state.holonomicRotation funny buiseness
         0, // Zero, as PathPlanner always drives in the direction the robot is facing
-        -MetersPerSecond * reverseFactor
+        -MetersPerSecond * reverseDriveFactor
       );
     }
 
@@ -496,6 +508,12 @@ public class AutoCommand extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+
+    // Manually reset amnesia
+    double[] zero = {0,0,0,0};
+    m_drive.recursiveError = zero;
+
+    // Stop drive
     m_drive.drive(0, 0, 0);
   }
 

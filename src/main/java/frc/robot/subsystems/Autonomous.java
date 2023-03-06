@@ -5,10 +5,6 @@
 package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
-import com.pathplanner.lib.PathPlanner;
-import com.pathplanner.lib.PathPlannerTrajectory;
-
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.libraries.PIDController;
 
@@ -31,6 +27,8 @@ public class Autonomous extends SubsystemBase {
   */
   public Autonomous(Drivetrain m_DrivetrainSubsystem) {
     m_driveTrain = m_DrivetrainSubsystem;
+
+    navxGyro.reset();
 
     turnController.setTarget(0);
   }

@@ -6,8 +6,10 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import frc.robot.libraries.DeadZoneTuner;
 import frc.robot.libraries.PIDController;
 import frc.robot.subsystems.Autonomous;
@@ -17,7 +19,7 @@ import frc.robot.subsystems.LimelightServer;
 public class AimTowardsTarget extends CommandBase {
   Autonomous m_auto;
 
-  PIDController TurnController = new PIDController(0.05, 0, 0.00025, 0);
+  PIDController TurnController = new PIDController(0.1, 0, 0.00025, 0);
   PIDController DriveController = new PIDController(0.04, 0, 0, 0);
 
   DoubleSupplier m_translationYSupplier, m_translationXSupplier;
@@ -41,15 +43,16 @@ public class AimTowardsTarget extends CommandBase {
 
     addRequirements(AutoSubsystem, dummyDrive);
     m_auto = AutoSubsystem;
+
+    TurnController.setTolerance(1);
+    TurnController.setTarget(0.5);
+
+    DriveController.setTarget(Constants.LimelightDegreesTarget);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    TurnController.setTolerance(1);
-    TurnController.setTarget(0.5);
-
-    DriveController.setTarget(Constants.LimelightDegreesTarget);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -84,6 +87,7 @@ public class AimTowardsTarget extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return Math.abs(DriveController.calculate(1, -1)) < 0.1 
+      && Math.abs(TurnController.calculate(1, -1)) < 0.1;
   }
 }

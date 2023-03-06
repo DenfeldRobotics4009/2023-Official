@@ -112,11 +112,12 @@ public class Drivetrain extends SubsystemBase {
    */
   public void feildOrientedDrive(double jsz, double jsx, double jsy) {
     double gyroAngle = Autonomous.navxGyro.getAngle();
+    SmartDashboard.putNumber("gyro", gyroAngle);
     // (xcos(theta) - ysin(theta) , ycos(theta) + xsin(theta)) // Relative point of rad theta
     drive(
       jsz, // Black magic math
-      jsX * Math.cos(gyroAngle) - jsY * Math.sin(gyroAngle),
-      jsY * Math.cos(gyroAngle) + jsX * Math.sin(gyroAngle)
+      (jsx * Math.sin(Math.toRadians(gyroAngle)) - jsy * Math.cos(Math.toRadians(gyroAngle))),
+      (jsy * Math.cos(Math.toRadians(gyroAngle)) + jsx * Math.sin(Math.toRadians(gyroAngle)))
     );
   }
 

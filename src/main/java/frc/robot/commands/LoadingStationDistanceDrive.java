@@ -10,7 +10,6 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
-import frc.robot.libraries.DeadZoneTuner;
 import frc.robot.libraries.PIDController;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivetrain;
@@ -70,6 +69,8 @@ public class LoadingStationDistanceDrive extends CommandBase {
 
         SmartDashboard.putNumber("pidOUt", pidOut);
         SmartDashboard.putNumber("pidTurnOUt", pidTurnOut);
+
+        SmartDashboard.putNumber("dist", distance);
 
         if (distance == -1) {
           m_drivetrainSubsystem.drive(

@@ -51,6 +51,7 @@ public class LimelightServer extends SubsystemBase {
   public LimelightServer() {
     LedMode.setNumber(1); // force lights off
     // Use defaults configured in the limelight webpage
+    LimelightServer.Pipeline.setNumber(1);
   }
 
   @Override
