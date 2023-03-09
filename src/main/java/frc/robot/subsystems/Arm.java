@@ -48,7 +48,7 @@ public class Arm extends SubsystemBase {
     mC_wrist = new PositionControlledCANSparkMax(m_wrist, "wrist");
 
     mC_arm.setPID(0.04, 0, 0.02);
-    mC_wrist.setPID(0.06, 0, 0);
+    mC_wrist.setPID(0.08, 0, 0);
 
     winchEncoderEntry = kArmTab.add("winchEncoder Value", 0).getEntry();
     armEncoderEntry = kArmTab.add("armEncoder Value", 0).getEntry();
