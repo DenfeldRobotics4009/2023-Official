@@ -2,7 +2,9 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.libraries.DeadZoneTuner;
 import frc.robot.libraries.PIDController;
+import frc.robot.subsystems.Autonomous;
 import frc.robot.subsystems.Drivetrain;
 
 import java.util.concurrent.locks.Lock;
@@ -65,15 +67,38 @@ public class DefaultDrive extends CommandBase {
 
         double turn = m_disableTurn.getAsBoolean() ? (0) : (0.8);
 
+        double gyroAngle = Autonomous.navxGyro.getAngle() + 90;
+        SmartDashboard.putNumber("gyro", gyroAngle);
+        // (ysin(theta) - xcos(theta) , ysin(theta) + xcos(theta)) // Relative point of rad theta
+    
+        double z = m_rotationSupplier.getAsDouble() * pidTurnOut * turn;
+        double y = m_translationYSupplier.getAsDouble() * pidOut;
+        double x = m_translationXSupplier.getAsDouble() * pidOut;
+
         m_drivetrainSubsystem.drive(
-            m_rotationSupplier.getAsDouble() * pidTurnOut * turn,
-            m_translationXSupplier.getAsDouble() * pidOut,
-            m_translationYSupplier.getAsDouble() * pidOut
-            // DeadZoneTuner.adjustForDeadzone(
-            //     m_translationYSupplier.getAsDouble() * pidOut, 
-            //     0.1 * Constants.MAX_VELOCITY_METERS_PER_SECOND, 
-            //     false)
+            DeadZoneTuner.adjustForDeadzone(
+                z, 0.3, false), 
+            DeadZoneTuner.adjustForDeadzone(
+                x*Math.sin(Math.toRadians(gyroAngle)) - y*Math.cos(Math.toRadians(gyroAngle)), 0.3, false), 
+            DeadZoneTuner.adjustForDeadzone(
+                y*Math.sin(Math.toRadians(gyroAngle)) + x*Math.cos(Math.toRadians(gyroAngle)), 0.3, false)
         );
+
+        // m_drivetrainSubsystem.drive(
+        //     m_rotationSupplier.getAsDouble() * pidTurnOut * turn, // Black magic math
+        // (m_translationYSupplier.getAsDouble() * pidOut*Math.sin(Math.toRadians(gyroAngle)) + m_translationXSupplier.getAsDouble() * pidOut*Math.cos(Math.toRadians(gyroAngle))),
+        // (m_translationXSupplier.getAsDouble() * pidOut*Math.sin(Math.toRadians(gyroAngle)) - m_translationYSupplier.getAsDouble() * pidOut*Math.cos(Math.toRadians(gyroAngle)))
+        // );
+
+        // m_drivetrainSubsystem.feildOrientedDrive(
+        //     m_rotationSupplier.getAsDouble() * pidTurnOut * turn,
+        //     m_translationXSupplier.getAsDouble() * pidOut,
+        //     m_translationYSupplier.getAsDouble() * pidOut
+        //     // DeadZoneTuner.adjustForDeadzone(
+        //     //     m_translationYSupplier.getAsDouble() * pidOut, 
+        //     //     0.1 * Constants.MAX_VELOCITY_METERS_PER_SECOND, 
+        //     //     false)
+        // );
     }
 
     @Override

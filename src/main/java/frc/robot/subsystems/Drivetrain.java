@@ -111,13 +111,12 @@ public class Drivetrain extends SubsystemBase {
    * @param jsy
    */
   public void feildOrientedDrive(double jsz, double jsx, double jsy) {
+
     double gyroAngle = Autonomous.navxGyro.getAngle();
-    SmartDashboard.putNumber("gyro", gyroAngle);
-    // (ysin(theta) - xcos(theta) , ysin(theta) + xcos(theta)) // Relative point of rad theta
     drive(
-      jsz, // Black magic math
-      (jsY*Math.sin(Math.toRadians(gyroAngle)) + jsx*Math.cos(Math.toRadians(gyroAngle))),
-      (jsY*Math.sin(Math.toRadians(gyroAngle)) - jsX*Math.cos(Math.toRadians(gyroAngle)))
+      jsZ, 
+      jsX*Math.sin(Math.toRadians(gyroAngle)) - jsY*Math.cos(Math.toRadians(gyroAngle)), 
+      jsY*Math.sin(Math.toRadians(gyroAngle)) + jsX*Math.cos(Math.toRadians(gyroAngle))
     );
   }
 
@@ -169,7 +168,11 @@ public class Drivetrain extends SubsystemBase {
 
     a_dpid[i].setInput(E);
 
-    recursiveError[i] += a_dpid[i].calculate(admax, admin); 
+    // Stop recursive error from increasing when input is max
+    if (Math.abs(S) < 1) {
+      recursiveError[i] += a_dpid[i].calculate(admax, admin); 
+    }
+
     recursiveError[i] = clamp(recursiveError[i], MAX_VOLTAGE, -MAX_VOLTAGE);
     return clamp(setSpeed + recursiveError[i], MAX_VOLTAGE, -MAX_VOLTAGE );
   }

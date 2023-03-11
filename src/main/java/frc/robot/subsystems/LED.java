@@ -14,11 +14,11 @@ public class LED extends SubsystemBase {
   PneumaticHub m_hub = new PneumaticHub(Constants.PneumaticHubID);
 
   Solenoid 
-    led_yellow1 = m_hub.makeSolenoid(0),
-    led_yellow2 = m_hub.makeSolenoid(1),
+    led_yellow1 = m_hub.makeSolenoid(0), 
+    led_yellow2 = m_hub.makeSolenoid(15), 
 
-    led_purple1 = m_hub.makeSolenoid(3),
-    led_purple2 = m_hub.makeSolenoid(15);
+    led_purple1 = m_hub.makeSolenoid(14),
+    led_purple2 = m_hub.makeSolenoid(2);
 
   /** Creates a new LED. */
   public LED() {

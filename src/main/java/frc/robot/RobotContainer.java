@@ -18,6 +18,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.commands.DefaultDrive;
@@ -235,6 +237,11 @@ public class RobotContainer {
     o5.and(o2.negate()).whileTrue(new WristGoto(m_manipulator, () -> Constants.WristCubeIntakeRot));
     o6.and(o2.negate()).whileTrue(new WristGoto(m_manipulator, () -> Constants.WristConeFlipRot));
     o7.and(o2.negate()).whileTrue(new WristGoto(m_manipulator, () -> -1));
+
+    o9.onTrue(new SequentialCommandGroup(
+      new WristGoto(m_manipulator, () -> Constants.WristLoadingStationIntake),
+      new ArmGoto(m_manipulator, () -> Constants.ArmLoadingStationIntake)
+    ));
 
     o5.and(o2).whileTrue(new ArmGoto(m_manipulator, () -> Constants.ConePlace2Rot));
     o6.and(o2).whileTrue(new ArmGoto(m_manipulator, () -> Constants.CubePlace2Rot));

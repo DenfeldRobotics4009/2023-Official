@@ -106,9 +106,12 @@ public final class Constants {
     public static final double ArmMaximumHightRot = -82; // Use in min
     public static final double WristMaximumAngleRot = -60; // use in min
 
+    public static final double WristLoadingStationIntake = -48.571235656;
+    public static final double ArmLoadingStationIntake = -71.59729766;
+
     public static final double LoadingStationDistGoal = 45.5;
 
-    public static final double intakeSpeed = 0.3;
+    public static final double intakeSpeed = 1; // 0.3 default, harass tanner
 
     // -20.5, 20.5 degrees
     public static final double LimelightDegreesTarget = -15;

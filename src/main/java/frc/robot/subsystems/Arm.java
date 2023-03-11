@@ -47,7 +47,7 @@ public class Arm extends SubsystemBase {
     m_wrist = new CANSparkMax(Constants.WristID, MotorType.kBrushless);
     mC_wrist = new PositionControlledCANSparkMax(m_wrist, "wrist");
 
-    mC_arm.setPID(0.04, 0, 0.02);
+    mC_arm.setPID(0.12, 0, 0.02);
     mC_wrist.setPID(0.08, 0, 0);
 
     winchEncoderEntry = kArmTab.add("winchEncoder Value", 0).getEntry();
