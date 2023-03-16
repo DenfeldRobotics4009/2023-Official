@@ -102,12 +102,12 @@ public final class Constants {
     public static final int WristID = 42; // TODO
     public static final int IntakeID = 50; // TODO
 
-    public static final double ArmMaximumLengthRot = 190;
+    public static final double ArmMaximumLengthRot = 114;
     public static final double ArmMaximumHightRot = -82; // Use in min
     public static final double WristMaximumAngleRot = -60; // use in min
 
-    public static final double WristLoadingStationIntake = -48.571235656;
-    public static final double ArmLoadingStationIntake = -71.59729766;
+    public static final double WristLoadingStationIntake = -50.5;
+    public static final double ArmLoadingStationIntake = -72.0;
 
     public static final double LoadingStationDistGoal = 45.5;
 
@@ -116,12 +116,16 @@ public final class Constants {
     // -20.5, 20.5 degrees
     public static final double LimelightDegreesTarget = -15;
 
-    public static final double WristCubeIntakeRot = -32;
+    public static final double WristCubeIntakeRot = -34;
     public static final double WristConeFlipRot = -36;
 
     public static final double ConePlace1Rot = -49.66;
-    public static final double ConePlace2Rot = -70.80;
+    public static final double ConePlace2Rot = -81.80;
     public static final double CubePlace2Rot = -57.40;
 
+    public static final double WristConePickup = -30.71;
+
     // public static final int DistSensorID = 0;
+
+    public static final double kDefaultPeriod = 0.02; // {edu.wpi.first.wpilibj.TimedRobot}
 }

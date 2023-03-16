@@ -10,8 +10,10 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
+import frc.robot.libraries.DeadZoneTuner;
 import frc.robot.libraries.PIDController;
 import frc.robot.subsystems.Arm;
+import frc.robot.subsystems.Autonomous;
 import frc.robot.subsystems.Drivetrain;
 
 public class LoadingStationDistanceDrive extends CommandBase {
@@ -73,10 +75,19 @@ public class LoadingStationDistanceDrive extends CommandBase {
         SmartDashboard.putNumber("dist", distance);
 
         if (distance == -1) {
+          double gyroAngle = Autonomous.navxGyro.getAngle() - 90;
+          
+          double z = m_rotationSupplier.getAsDouble() * pidTurnOut;
+          double y = m_translationYSupplier.getAsDouble() * pidOut;
+          double x = m_translationXSupplier.getAsDouble() * pidOut;
+
           m_drivetrainSubsystem.drive(
-              m_rotationSupplier.getAsDouble() * pidTurnOut,
-              m_translationXSupplier.getAsDouble() * pidOut,
-              m_translationYSupplier.getAsDouble() * pidOut
+              DeadZoneTuner.adjustForDeadzone(
+                  z, 0.3, false), 
+              DeadZoneTuner.adjustForDeadzone(
+                  x*Math.sin(Math.toRadians(gyroAngle)) - y*Math.cos(Math.toRadians(gyroAngle)), 0.3, false), 
+              DeadZoneTuner.adjustForDeadzone(
+                  y*Math.sin(Math.toRadians(gyroAngle)) + x*Math.cos(Math.toRadians(gyroAngle)), 0.3, false)
           );
         } else {
           DriveController.setInput(distance);

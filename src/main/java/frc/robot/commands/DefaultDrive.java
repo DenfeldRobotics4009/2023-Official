@@ -17,7 +17,7 @@ public class DefaultDrive extends CommandBase {
     private final DoubleSupplier m_translationXSupplier;
     private final DoubleSupplier m_translationYSupplier;
     private final DoubleSupplier m_rotationSupplier;
-    private final BooleanSupplier m_PrecisionMode, m_disableTurn;
+    private final BooleanSupplier m_PrecisionMode, m_feildOriented;
 
 
     PIDController 
@@ -28,12 +28,12 @@ public class DefaultDrive extends CommandBase {
 
     public DefaultDrive(Drivetrain drivetrainSubsystem,
                                BooleanSupplier precisionMode,
-                               BooleanSupplier disableTurn,
+                               BooleanSupplier feildOriented,
                                DoubleSupplier translationXSupplier,
                                DoubleSupplier translationYSupplier,
                                DoubleSupplier rotationSupplier                          
                                ) {
-        this.m_disableTurn = disableTurn;
+        this.m_feildOriented = feildOriented;
         this.m_drivetrainSubsystem = drivetrainSubsystem;
         this.m_PrecisionMode = precisionMode;
         this.m_translationXSupplier = translationXSupplier;
@@ -65,24 +65,30 @@ public class DefaultDrive extends CommandBase {
         SmartDashboard.putNumber("pidOUt", pidOut);
         SmartDashboard.putNumber("pidTurnOUt", pidTurnOut);
 
-        double turn = m_disableTurn.getAsBoolean() ? (0) : (0.8);
-
-        double gyroAngle = Autonomous.navxGyro.getAngle() + 90;
+        double gyroAngle = Autonomous.navxGyro.getAngle() - 90;
         SmartDashboard.putNumber("gyro", gyroAngle);
         // (ysin(theta) - xcos(theta) , ysin(theta) + xcos(theta)) // Relative point of rad theta
     
-        double z = m_rotationSupplier.getAsDouble() * pidTurnOut * turn;
+        double z = m_rotationSupplier.getAsDouble() * pidTurnOut;
         double y = m_translationYSupplier.getAsDouble() * pidOut;
         double x = m_translationXSupplier.getAsDouble() * pidOut;
 
-        m_drivetrainSubsystem.drive(
-            DeadZoneTuner.adjustForDeadzone(
-                z, 0.3, false), 
-            DeadZoneTuner.adjustForDeadzone(
-                x*Math.sin(Math.toRadians(gyroAngle)) - y*Math.cos(Math.toRadians(gyroAngle)), 0.3, false), 
-            DeadZoneTuner.adjustForDeadzone(
-                y*Math.sin(Math.toRadians(gyroAngle)) + x*Math.cos(Math.toRadians(gyroAngle)), 0.3, false)
-        );
+        if (!m_feildOriented.getAsBoolean()) {
+            m_drivetrainSubsystem.drive(
+                DeadZoneTuner.adjustForDeadzone(
+                    z, 0.3, false), 
+                DeadZoneTuner.adjustForDeadzone(
+                    x*Math.sin(Math.toRadians(gyroAngle)) - y*Math.cos(Math.toRadians(gyroAngle)), 0.3, false), 
+                DeadZoneTuner.adjustForDeadzone(
+                    y*Math.sin(Math.toRadians(gyroAngle)) + x*Math.cos(Math.toRadians(gyroAngle)), 0.3, false)
+            );
+        } else {
+            m_drivetrainSubsystem.drive(
+                z,
+                x,
+                y
+            );
+        }
 
         // m_drivetrainSubsystem.drive(
         //     m_rotationSupplier.getAsDouble() * pidTurnOut * turn, // Black magic math

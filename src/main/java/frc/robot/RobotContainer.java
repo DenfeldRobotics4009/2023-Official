@@ -36,6 +36,8 @@ import frc.robot.commands.RequestCube;
 import frc.robot.commands.Reset;
 import frc.robot.commands.StopIntake;
 import frc.robot.commands.TogglePipeline;
+import frc.robot.commands.UpdatePosition;
+import frc.robot.commands.WinchGoto;
 import frc.robot.commands.WristGoto;
 import frc.robot.libraries.DeadZoneTuner;
 import frc.robot.commands.AimTowardsTarget;
@@ -45,6 +47,7 @@ import frc.robot.commands.AutoLevel;
 import frc.robot.commands.BypassOperate;
 import frc.robot.commands.Calibrate;
 import frc.robot.subsystems.Autonomous;
+import frc.robot.subsystems.DriveKinematics;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LED;
@@ -70,6 +73,8 @@ public class RobotContainer {
   private final Autonomous m_autoSubsystem = new Autonomous(m_drivetrainSubsystem);
 
   private final LimelightServer m_limeLight = new LimelightServer();
+
+  private final DriveKinematics m_kinenatics = new DriveKinematics();
   
   private final LED m_led = new LED();
 
@@ -80,6 +85,11 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+
+    // Poll robot position based upon vilocities
+    m_kinenatics.setDefaultCommand(
+      new UpdatePosition(m_kinenatics)
+    );
 
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDrive(
           m_drivetrainSubsystem,
@@ -109,6 +119,8 @@ public class RobotContainer {
         () -> m_jsOperator.getRawAxis(1)
       )
     );
+
+    
 
     // Why call it object, when its an int?
     autoChooser.addOption("None", 0);
@@ -222,8 +234,8 @@ public class RobotContainer {
      * .and(o1.negate()) Makes the command require the trigger to not be
      * pressed to function. Thus, the trigger can act as a function key
      */
-    o10.and(o1.negate()).onFalse(new Calibrate(m_manipulator));
-    o10.and(o1.negate()).whileTrue(
+    o11.and(o1.negate()).onFalse(new Calibrate(m_manipulator));
+    o11.and(o1.negate()).whileTrue(
       new BypassOperate(
         m_manipulator, 
         () -> m_jsOperator.getRawAxis(2),
@@ -243,9 +255,23 @@ public class RobotContainer {
       new ArmGoto(m_manipulator, () -> Constants.ArmLoadingStationIntake)
     ));
 
-    o5.and(o2).whileTrue(new ArmGoto(m_manipulator, () -> Constants.ConePlace2Rot));
+    //o5.and(o2).whileTrue(new ArmGoto(m_manipulator, () -> Constants.ConePlace2Rot));
     o6.and(o2).whileTrue(new ArmGoto(m_manipulator, () -> Constants.CubePlace2Rot));
     o7.and(o2).whileTrue(new ArmGoto(m_manipulator, () -> Constants.ConePlace1Rot));
+
+    // SequentialCommandGroup conePlace2 = new SequentialCommandGroup();
+    // conePlace2.addCommands(
+    //   new ArmGoto(m_manipulator, () -> Constants.ConePlace2Rot),
+    //   new WinchGoto(m_manipulator, () -> 100)
+    // );
+    // conePlace2.andThen(new WaitCommand(0.5));
+    // conePlace2.andThen(new WristGoto(m_manipulator, () -> -45));
+    o5.and(o2).whileTrue(
+      new ManipulatorGoto(m_manipulator, 
+      () -> Constants.ConePlace2Rot, 
+      () -> 100,
+      () -> -41)
+    );
 
     o1.and(o4.negate()).whileTrue(new IntakeCube(m_intake));
     o3.and(o4.negate()).whileTrue(new OuttakeCube(m_intake));
@@ -405,7 +431,6 @@ public class RobotContainer {
             2.5, 
             0)
         );
-
 
       default:
         return new InstantCommand(); // Does nothing

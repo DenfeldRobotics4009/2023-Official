@@ -5,12 +5,11 @@
 package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
+
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.libraries.PIDController;
 
-/**
- * Among us lore easter egg!!!1!11!!!!1!
- */
 public class Autonomous extends SubsystemBase {
   Drivetrain m_driveTrain;
 
@@ -31,6 +30,7 @@ public class Autonomous extends SubsystemBase {
     navxGyro.reset();
 
     turnController.setTarget(0);
+
   }
 
   /**
@@ -69,5 +69,6 @@ public class Autonomous extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+
   }
 }
