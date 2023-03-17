@@ -7,6 +7,7 @@ package frc.robot;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.DriverStation;
 
 // glory to felix the helix
@@ -36,7 +37,6 @@ import frc.robot.commands.RequestCube;
 import frc.robot.commands.Reset;
 import frc.robot.commands.StopIntake;
 import frc.robot.commands.TogglePipeline;
-import frc.robot.commands.UpdatePosition;
 import frc.robot.commands.WinchGoto;
 import frc.robot.commands.WristGoto;
 import frc.robot.libraries.DeadZoneTuner;
@@ -86,10 +86,8 @@ public class RobotContainer {
    */
   public RobotContainer() {
 
-    // Poll robot position based upon vilocities
-    m_kinenatics.setDefaultCommand(
-      new UpdatePosition(m_kinenatics)
-    );
+    // Initalize USB camera to display feed on shuffleboard
+    CameraServer.startAutomaticCapture(0);
 
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDrive(
           m_drivetrainSubsystem,
@@ -120,9 +118,6 @@ public class RobotContainer {
       )
     );
 
-    
-
-    // Why call it object, when its an int?
     autoChooser.addOption("None", 0);
     autoChooser.setDefaultOption("SingleConeClimb A", 1);
     autoChooser.addOption("SingleCone A", 2);
@@ -214,9 +209,6 @@ public class RobotContainer {
 
     d11.whileTrue(new AutoLevel(m_drivetrainSubsystem));
 
-    // TESTING PLEASE REMOVE OMG, IF THIS RUNS WHEN ITS NOT SUPPOSED TO HELL WILL RISE
-    //d12.onTrue(getAutonomousCommand());
-
     JoystickButton o1 = new JoystickButton(m_jsOperator, 1);
     JoystickButton o2 = new JoystickButton(m_jsOperator, 2);
     JoystickButton o3 = new JoystickButton(m_jsOperator, 3);
@@ -270,7 +262,7 @@ public class RobotContainer {
       new ManipulatorGoto(m_manipulator, 
       () -> Constants.ConePlace2Rot, 
       () -> 100,
-      () -> -41)
+      () -> -43)
     );
 
     o1.and(o4.negate()).whileTrue(new IntakeCube(m_intake));
