@@ -74,7 +74,7 @@ public class RobotContainer {
 
   private final LimelightServer m_limeLight = new LimelightServer();
 
-  private final DriveKinematics m_kinenatics = new DriveKinematics();
+  private final DriveKinematics m_kinenatics = new DriveKinematics(m_drivetrainSubsystem);
   
   private final LED m_led = new LED();
 
@@ -90,30 +90,34 @@ public class RobotContainer {
     CameraServer.startAutomaticCapture(0);
 
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDrive(
-          m_drivetrainSubsystem,
-          () -> m_jsDriver.getTrigger(),
+        m_drivetrainSubsystem,
+        () -> m_jsDriver.getTrigger(),
 
-          () -> m_jsDriver.getRawButton(8),
+        () -> m_jsDriver.getRawButton(8),
 
-          () -> DeadZoneTuner.adjustForDeadzone(
-            m_jsDriver.getX(), 0.15, false
-          ) * Constants.MAX_VELOCITY_METERS_PER_SECOND,
+        () -> DeadZoneTuner.adjustForDeadzone(
+          m_jsDriver.getX(), 0.15, false
+        ) * Constants.MAX_VELOCITY_METERS_PER_SECOND,
 
-          () -> DeadZoneTuner.adjustForDeadzone(
-            m_jsDriver.getY(), 0.15, false
-          ) * Constants.MAX_VELOCITY_METERS_PER_SECOND,
-          
-          () -> DeadZoneTuner.adjustForDeadzone(
-            m_jsDriver.getZ(), 0.16, false
-          ) * Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
-    ));
+        () -> DeadZoneTuner.adjustForDeadzone(
+          m_jsDriver.getY(), 0.15, false
+        ) * Constants.MAX_VELOCITY_METERS_PER_SECOND,
+        
+        () -> DeadZoneTuner.adjustForDeadzone(
+          m_jsDriver.getZ(), 0.16, false
+        ) * Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+
+        () -> m_jsDriver.getRawButton(9),
+        () -> m_jsDriver.getRawButton(10)
+      )
+    );
 
     
     m_manipulator.setDefaultCommand(
       new DefaultOperate(
         m_manipulator, 
         () -> DeadZoneTuner.adjustForDeadzone(m_jsOperator.getRawAxis(2), 0.16, false),
-        () -> m_jsOperator.getRawAxis(4),
+        () -> DeadZoneTuner.adjustForDeadzone(m_jsOperator.getRawAxis(4), 0.05, false),
         () -> m_jsOperator.getRawAxis(1)
       )
     );
@@ -123,6 +127,12 @@ public class RobotContainer {
     autoChooser.addOption("SingleCone A", 2);
 
     autoChooser.addOption("SingleCone B", 3);
+
+    autoChooser.addOption("SingleCube A", 4);
+
+    autoChooser.setDefaultOption("SingleConeClimb B", 5);
+
+    autoChooser.setDefaultOption("SingleCubeClimb A", 6);
 
     SmartDashboard.putData("Autonomous", autoChooser);
     
@@ -157,8 +167,8 @@ public class RobotContainer {
     JoystickButton d6 = new JoystickButton(m_jsDriver, 6);
     //JoystickButton d7 = new JoystickButton(m_jsDriver, 7);
     JoystickButton d8 = new JoystickButton(m_jsDriver, 8);
-    JoystickButton d9 = new JoystickButton(m_jsDriver, 9);
-    JoystickButton d10 = new JoystickButton(m_jsDriver, 10);
+    //JoystickButton d9 = new JoystickButton(m_jsDriver, 9);
+    //JoystickButton d10 = new JoystickButton(m_jsDriver, 10);
     JoystickButton d11 = new JoystickButton(m_jsDriver, 11);
     JoystickButton d12 = new JoystickButton(m_jsDriver, 12);
     
@@ -293,7 +303,7 @@ public class RobotContainer {
             m_path.getMarkers().get(0), 
             new ManipulatorGoto(
               m_manipulator,
-              () -> -67.64, 
+              () -> -75.0, 
               () -> 88.71, 
               () -> -38.49), 
             new AutoCommand.EventMarkerCommandMode.WhileTrue(), 
@@ -355,7 +365,7 @@ public class RobotContainer {
             m_path2.getMarkers().get(0), 
             new ManipulatorGoto(
               m_manipulator,
-              () -> -67.64, 
+              () -> -75.0, 
               () -> 88.71, 
               () -> -38.49), 
             new AutoCommand.EventMarkerCommandMode.WhileTrue(), 
@@ -397,7 +407,7 @@ public class RobotContainer {
             m_path3.getMarkers().get(0), 
             new ManipulatorGoto(
               m_manipulator,
-              () -> -67.64, 
+              () -> -75.0, 
               () -> 88.71, 
               () -> -38.49), 
             new AutoCommand.EventMarkerCommandMode.WhileTrue(), 
@@ -423,6 +433,144 @@ public class RobotContainer {
             2.5, 
             0)
         );
+
+      case 4:
+
+        PathPlannerTrajectory m_path4 = PathPlanner.loadPath(
+          "1Cone2", 2.3, 2); // FOR CUBES!
+          
+
+        return new AutoCommand(
+          m_drivetrainSubsystem, 
+          m_path4,
+          true,
+          (DriverStation.getAlliance() == DriverStation.Alliance.Red) ? (true) : (false),
+          new AutoCommand.EventMarkerSet(
+            m_path4.getMarkers().get(0), 
+            new ManipulatorGoto(
+              m_manipulator,
+              () -> -75.0, 
+              () -> 88.71, 
+              () -> -38.49), 
+            new AutoCommand.EventMarkerCommandMode.WhileTrue(), 
+            2, 
+            2),
+          
+            new AutoCommand.TimerScheduledCommand(
+              new OuttakeCube(m_intake), 
+              new AutoCommand.EventMarkerCommandMode.OnTrue(), 
+              1, 
+              1.5),
+          
+            new AutoCommand.TimerScheduledCommand(
+              new StopIntake(m_intake), 
+              new AutoCommand.EventMarkerCommandMode.OnTrue(), 
+              1, 
+              2.5),
+
+          new AutoCommand.EventMarkerSet(
+            m_path4.getMarkers().get(1), 
+            new Reset(m_manipulator),
+            new AutoCommand.EventMarkerCommandMode.OnTrue(), 
+            2.5, 
+            0)
+        );
+      
+      case 5:
+
+        PathPlannerTrajectory m_path5 = PathPlanner.loadPath(
+          "1ConeClimb2", 2.8, 2);
+
+        return new AutoCommand(
+          m_drivetrainSubsystem, 
+          m_path5,
+          true,
+          (DriverStation.getAlliance() == DriverStation.Alliance.Red) ? (true) : (false),
+          new AutoCommand.EventMarkerSet(
+            m_path5.getMarkers().get(0), 
+            new ManipulatorGoto(
+              m_manipulator,
+              () -> -75.0, 
+              () -> 88.71, 
+              () -> -38.49), 
+            new AutoCommand.EventMarkerCommandMode.WhileTrue(), 
+            2, 
+            2),
+          
+          new AutoCommand.TimerScheduledCommand(
+            new OuttakeCone(m_intake), 
+            new AutoCommand.EventMarkerCommandMode.OnTrue(), 
+            1, 
+            1.5),
+          
+          new AutoCommand.TimerScheduledCommand(
+            new StopIntake(m_intake), 
+            new AutoCommand.EventMarkerCommandMode.OnTrue(), 
+            1, 
+            2.5),
+
+          new AutoCommand.EventMarkerSet(
+            m_path5.getMarkers().get(1), 
+            new Reset(m_manipulator),
+            new AutoCommand.EventMarkerCommandMode.OnTrue(), 
+            2.5, 
+            0),
+
+          new AutoCommand.EventMarkerSet(
+            m_path5.getMarkers().get(2), 
+            new AutoLevel(m_drivetrainSubsystem), 
+            new AutoCommand.EventMarkerCommandMode.WhileTrue(), 
+            8, 
+            8)
+          );
+      
+        case 6:
+
+          PathPlannerTrajectory m_path6 = PathPlanner.loadPath(
+            "1ConeClimb2", 2.8, 2); // FOR CUBE
+  
+          return new AutoCommand(
+            m_drivetrainSubsystem, 
+            m_path6,
+            true,
+            (DriverStation.getAlliance() == DriverStation.Alliance.Red) ? (true) : (false),
+            new AutoCommand.EventMarkerSet(
+              m_path6.getMarkers().get(0), 
+              new ManipulatorGoto(
+                m_manipulator,
+                () -> -67.64, 
+                () -> 88.71, 
+                () -> -38.49), 
+              new AutoCommand.EventMarkerCommandMode.WhileTrue(), 
+              2, 
+              2),
+            
+            new AutoCommand.TimerScheduledCommand(
+              new OuttakeCube(m_intake), 
+              new AutoCommand.EventMarkerCommandMode.OnTrue(), 
+              1, 
+              1.5),
+            
+            new AutoCommand.TimerScheduledCommand(
+              new StopIntake(m_intake), 
+              new AutoCommand.EventMarkerCommandMode.OnTrue(), 
+              1, 
+              2.5),
+  
+            new AutoCommand.EventMarkerSet(
+              m_path6.getMarkers().get(1), 
+              new Reset(m_manipulator),
+              new AutoCommand.EventMarkerCommandMode.OnTrue(), 
+              2.5, 
+              0),
+  
+            new AutoCommand.EventMarkerSet(
+              m_path6.getMarkers().get(2), 
+              new AutoLevel(m_drivetrainSubsystem), 
+              new AutoCommand.EventMarkerCommandMode.WhileTrue(), 
+              8, 
+              8)
+            );
 
       default:
         return new InstantCommand(); // Does nothing

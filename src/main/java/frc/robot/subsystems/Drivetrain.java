@@ -38,7 +38,7 @@ public class Drivetrain extends SubsystemBase {
   NetworkTableEntryGroup SteerEncoderVal = new NetworkTableEntryGroup(kSwerveTab, "Enc", 0);
   NetworkTableEntryGroup DriveError = new NetworkTableEntryGroup(kSwerveTab, "DError", 0);
 
-  final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
+  public final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
     new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0), // Front left
     new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0), // Front right
     new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0), // Back left
@@ -88,6 +88,8 @@ public class Drivetrain extends SubsystemBase {
       a_dpid[i].setTolerance(20); // (RPM) arbitrary!!! #FIXME
       a_pid[i].setTolerance(6); // (Degreees)
       a_pid[i].setTarget(0);
+
+      a_mctrlr[i].setOpenLoopRampRate(0.25);
     }
   }
 

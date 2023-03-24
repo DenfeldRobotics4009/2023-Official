@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants;
 import frc.robot.libraries.DeadZoneTuner;
 import frc.robot.libraries.PIDController;
 import frc.robot.subsystems.Autonomous;
@@ -17,12 +18,14 @@ public class DefaultDrive extends CommandBase {
     private final DoubleSupplier m_translationXSupplier;
     private final DoubleSupplier m_translationYSupplier;
     private final DoubleSupplier m_rotationSupplier;
-    private final BooleanSupplier m_PrecisionMode, m_feildOriented;
+    
+    private final BooleanSupplier m_PrecisionMode, m_feildOriented, m_faceFeild, m_faceDriver;
 
 
     PIDController 
         factorController = new PIDController(0.2, 0, 0, 0),
-        factorTurnController = new PIDController(0.2, 0, 0, 0);
+        factorTurnController = new PIDController(0.2, 0, 0, 0),
+        turnController = new PIDController(0.075, 0, 0.015, 0);
     double recursiveAdd, recursiveTurnAdd;
     double pidOut, pidTurnOut;
 
@@ -31,14 +34,19 @@ public class DefaultDrive extends CommandBase {
                                BooleanSupplier feildOriented,
                                DoubleSupplier translationXSupplier,
                                DoubleSupplier translationYSupplier,
-                               DoubleSupplier rotationSupplier                          
-                               ) {
+                               DoubleSupplier rotationSupplier,
+                               
+                               BooleanSupplier faceFeild,
+                               BooleanSupplier faceDriver
+                            ) {
         this.m_feildOriented = feildOriented;
         this.m_drivetrainSubsystem = drivetrainSubsystem;
         this.m_PrecisionMode = precisionMode;
         this.m_translationXSupplier = translationXSupplier;
         this.m_translationYSupplier = translationYSupplier;
         this.m_rotationSupplier = rotationSupplier;
+        this.m_faceFeild = faceFeild;
+        this.m_faceDriver = faceDriver;
 
         addRequirements(drivetrainSubsystem);
 
@@ -48,8 +56,6 @@ public class DefaultDrive extends CommandBase {
 
     @Override
     public void execute() {
-        SmartDashboard.putBoolean("Default Drive", true);
-
         // PID target will always be 0, so we read the rror
         double target = (m_PrecisionMode.getAsBoolean()) ? 0.5 : 1;
         double turntarget = (m_PrecisionMode.getAsBoolean()) ? 0.35 : 0.75;
@@ -73,44 +79,42 @@ public class DefaultDrive extends CommandBase {
         double y = m_translationYSupplier.getAsDouble() * pidOut;
         double x = m_translationXSupplier.getAsDouble() * pidOut;
 
+        /**
+         * When face driver or face feild is being held, override
+         * z value and assign it to the result of the PIDController
+         */
+
+        // Only allow button turning when not in precision mode!
+        turnController.setInput(Autonomous.navxGyro.getAngle() % 360);
+        if (!m_PrecisionMode.getAsBoolean() && m_faceDriver.getAsBoolean()) {
+            turnController.setTarget(180); // 0 is down feild
+            z = turnController.calculate(Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND, -Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND);
+        } else if (!m_PrecisionMode.getAsBoolean() && m_faceFeild.getAsBoolean()) {
+            turnController.setTarget(0);
+            z = turnController.calculate(Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND, -Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND);
+        }
+
+        /**
+         * Drive the robot 
+         */
         if (!m_feildOriented.getAsBoolean()) {
+        
             m_drivetrainSubsystem.drive(
                 DeadZoneTuner.adjustForDeadzone(
                     z, 0.3, false), 
+
+                // convert to feild oriented via funny buisiness
                 DeadZoneTuner.adjustForDeadzone(
                     x*Math.sin(Math.toRadians(gyroAngle)) - y*Math.cos(Math.toRadians(gyroAngle)), 0.3, false), 
                 DeadZoneTuner.adjustForDeadzone(
                     y*Math.sin(Math.toRadians(gyroAngle)) + x*Math.cos(Math.toRadians(gyroAngle)), 0.3, false)
             );
-        } else {
-            m_drivetrainSubsystem.drive(
-                z,
-                x,
-                y
-            );
-        }
-
-        // m_drivetrainSubsystem.drive(
-        //     m_rotationSupplier.getAsDouble() * pidTurnOut * turn, // Black magic math
-        // (m_translationYSupplier.getAsDouble() * pidOut*Math.sin(Math.toRadians(gyroAngle)) + m_translationXSupplier.getAsDouble() * pidOut*Math.cos(Math.toRadians(gyroAngle))),
-        // (m_translationXSupplier.getAsDouble() * pidOut*Math.sin(Math.toRadians(gyroAngle)) - m_translationYSupplier.getAsDouble() * pidOut*Math.cos(Math.toRadians(gyroAngle)))
-        // );
-
-        // m_drivetrainSubsystem.feildOrientedDrive(
-        //     m_rotationSupplier.getAsDouble() * pidTurnOut * turn,
-        //     m_translationXSupplier.getAsDouble() * pidOut,
-        //     m_translationYSupplier.getAsDouble() * pidOut
-        //     // DeadZoneTuner.adjustForDeadzone(
-        //     //     m_translationYSupplier.getAsDouble() * pidOut, 
-        //     //     0.1 * Constants.MAX_VELOCITY_METERS_PER_SECOND, 
-        //     //     false)
-        // );
+        // else use robot relative
+        } else {m_drivetrainSubsystem.drive(z, x, y);}
     }
 
     @Override
     public void end(boolean interrupted) {
         m_drivetrainSubsystem.drive(0, 0, 0);
-        SmartDashboard.putBoolean("Default Drive", false);
-
     }
 }

@@ -27,8 +27,6 @@ public class Autonomous extends SubsystemBase {
   public Autonomous(Drivetrain m_DrivetrainSubsystem) {
     m_driveTrain = m_DrivetrainSubsystem;
 
-    navxGyro.reset();
-
     turnController.setTarget(0);
 
   }

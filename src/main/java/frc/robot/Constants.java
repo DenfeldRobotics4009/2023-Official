@@ -86,10 +86,10 @@ public final class Constants {
 
     public static final int PneumaticHubID = 60;
 
-    public static final double L1SMagnetOffset = -73.5;
-    public static final double R1SMagnetOffset = 3;
-    public static final double L2SMagnetOffset = 85;
-    public static final double R2SMagnetOffset = 230;
+    public static final double L1SMagnetOffset = -10;
+    public static final double R1SMagnetOffset = -115;
+    public static final double L2SMagnetOffset = 108;
+    public static final double R2SMagnetOffset = -50;
 
     public static final int JointM_ = 0;
 
@@ -97,10 +97,10 @@ public final class Constants {
         L1SMagnetOffset, R1SMagnetOffset, L2SMagnetOffset, R2SMagnetOffset
     };
 
-    public static final int ArmID = 41; // TODO
-    public static final int WinchID = 40; // TODO
-    public static final int WristID = 42; // TODO
-    public static final int IntakeID = 50; // TODO
+    public static final int ArmID = 41; 
+    public static final int WinchID = 40; 
+    public static final int WristID = 42; 
+    public static final int IntakeID = 50; 
 
     public static final double ArmMaximumLengthRot = 114;
     public static final double ArmMaximumHightRot = -82; // Use in min
@@ -113,7 +113,6 @@ public final class Constants {
 
     public static final double intakeSpeed = 1; // 0.3 default, harass tanner
 
-    // -20.5, 20.5 degrees
     public static final double LimelightDegreesTarget = -15;
 
     public static final double WristCubeIntakeRot = -34;
