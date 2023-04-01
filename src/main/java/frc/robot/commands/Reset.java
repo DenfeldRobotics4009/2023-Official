@@ -22,7 +22,7 @@ public class Reset extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_arm.mC_arm.idealPosition = 1;
+    m_arm.mC_arm.idealPosition = -3;
     m_arm.mC_wrist.idealPosition = 0.1;
     m_arm.mC_winch.idealPosition = 0.1;
   }

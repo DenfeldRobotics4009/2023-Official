@@ -8,6 +8,7 @@ import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPlannerTrajectory.EventMarker;
 import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
 
+import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -15,6 +16,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.Constants;
 import frc.robot.commands.AutoCommand.EventMarkerCommandMode.CommandScheduleMode;
 import frc.robot.libraries.PIDController;
@@ -372,6 +374,9 @@ public class AutoCommand extends CommandBase {
     // Grab state at current time, offset by timerOffset
     // Cast due to PathPlannerState functioning as Trajectory.State
     PathPlannerState m_state = (PathPlannerState) m_path.sample(m_pathTimer.get());
+
+    // Trajectory path = (Trajectory) m_path;
+    
     // Extract speeds from state, thus allowing them to be set to 0
     double MetersPerSecond = m_state.velocityMetersPerSecond;
     double RadPerSecond = m_state.angularVelocityRadPerSec;

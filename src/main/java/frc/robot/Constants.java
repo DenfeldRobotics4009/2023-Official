@@ -13,6 +13,10 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+    public static final double SWERVEWHEEL_CIRCUMFERANCE = Math.PI*0.09401432; // 3.9
+
+    public static final double ENCODER_GEAR_RATIO = 1 / 8.14;
+
     /**
      * The left-to-right distance between the drivetrain wheels
      *

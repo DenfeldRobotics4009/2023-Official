@@ -9,6 +9,7 @@ import javax.swing.text.Position;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.RelativeEncoder;
+import com.swervedrivespecialties.swervelib.SwerveModule;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -28,19 +29,20 @@ public class DriveKinematics extends SubsystemBase {
   CANCoder[] turnEncoder;
   RelativeEncoder[] driveEncoder;
 
+  double[] initialDriveEncoderValue = new double[4];
+
   double[] lastDistance = new double[4];
 
   private ShuffleboardTab kKinematicsTab = Shuffleboard.getTab("DriveKinematics");
 
-  Pose2d robotPosition = new Pose2d();
-
-  SwerveDriveOdometry odometry;
+  public SwerveDriveOdometry odometry;
 
   private GenericEntry 
+    driveEncoderEntry = kKinematicsTab.add("DriveEncoderVal", 0).getEntry(),
     xPosEntry = kKinematicsTab.add("XPos", 0).getEntry(),
     yPosEntry = kKinematicsTab.add("YPos", 0).getEntry(),
-    xSpeedEntry = kKinematicsTab.add("XSpeed", 0).getEntry(),
-    ySpeedEntry = kKinematicsTab.add("YSpeed", 0).getEntry();
+    rotation0Entry = kKinematicsTab.add("Rotation0", 0).getEntry(),
+    rotation1Entry = kKinematicsTab.add("Rotation1", 0).getEntry();
 
   /** Creates a new DriveKinimatics. */
   public DriveKinematics(Drivetrain drivetrain) {
@@ -52,14 +54,15 @@ public class DriveKinematics extends SubsystemBase {
     odometry = new SwerveDriveOdometry(
       drivetrain.m_kinematics, 
       Autonomous.navxGyro.getRotation2d(), 
-      new SwerveModulePosition[]{
-        new SwerveModulePosition(driveEncoder[0].getPosition(), new Rotation2d(turnEncoder[0].getPosition())),
-        new SwerveModulePosition(driveEncoder[1].getPosition(), new Rotation2d(turnEncoder[1].getPosition())),
-        new SwerveModulePosition(driveEncoder[2].getPosition(), new Rotation2d(turnEncoder[2].getPosition())),
-        new SwerveModulePosition(driveEncoder[3].getPosition(), new Rotation2d(turnEncoder[3].getPosition()))
-      }
-      // , new pos2d(0, 0, new Rotation2d(0)) // initial offset
+      getZeroPosition()
     );
+
+    resetOdometry();
+
+    xPosEntry.setDouble(odometry.getPoseMeters().getX());
+    yPosEntry.setDouble(odometry.getPoseMeters().getY());
+
+    
   }
 
   /**
@@ -67,65 +70,77 @@ public class DriveKinematics extends SubsystemBase {
    */
   public void updatePosition() {
 
-    robotPosition = odometry.update(
+    SwerveModulePosition[] swerveModulePositions = new SwerveModulePosition[4];
+
+    for (int i = 0; i < 4; i++) {
+      swerveModulePositions[i] = new SwerveModulePosition(
+        // Calculate meters from drive rotations
+        (driveEncoder[i].getPosition() - initialDriveEncoderValue[i])* (Constants.SWERVEWHEEL_CIRCUMFERANCE * Constants.ENCODER_GEAR_RATIO),
+        // Rotation2d works in radians
+        new Rotation2d(Math.toRadians(turnEncoder[i].getAbsolutePosition()))
+      );
+    }
+
+    odometry.update(
       Autonomous.navxGyro.getRotation2d(), 
-      new SwerveModulePosition[]{
-        new SwerveModulePosition(driveEncoder[0].getPosition(), new Rotation2d(turnEncoder[0].getPosition())),
-        new SwerveModulePosition(driveEncoder[1].getPosition(), new Rotation2d(turnEncoder[1].getPosition())),
-        new SwerveModulePosition(driveEncoder[2].getPosition(), new Rotation2d(turnEncoder[2].getPosition())),
-        new SwerveModulePosition(driveEncoder[3].getPosition(), new Rotation2d(turnEncoder[3].getPosition()))
+      new SwerveModulePosition[] {
+        new SwerveModulePosition(
+          // Calculate meters from drive rotations
+          (driveEncoder[0].getPosition() - initialDriveEncoderValue[0])* (Constants.SWERVEWHEEL_CIRCUMFERANCE * Constants.ENCODER_GEAR_RATIO),
+          // Rotation2d works in radians
+          new Rotation2d(Math.toRadians(turnEncoder[0].getAbsolutePosition()))
+        ),
+        new SwerveModulePosition(
+          // Calculate meters from drive rotations
+          (driveEncoder[1].getPosition() - initialDriveEncoderValue[1])* (Constants.SWERVEWHEEL_CIRCUMFERANCE * Constants.ENCODER_GEAR_RATIO),
+          // Rotation2d works in radians
+          new Rotation2d(Math.toRadians(turnEncoder[1].getAbsolutePosition()))
+        ),
+        new SwerveModulePosition(
+          // Calculate meters from drive rotations
+          (driveEncoder[2].getPosition() - initialDriveEncoderValue[2])* (Constants.SWERVEWHEEL_CIRCUMFERANCE * Constants.ENCODER_GEAR_RATIO),
+          // Rotation2d works in radians
+          new Rotation2d(Math.toRadians(turnEncoder[2].getAbsolutePosition()))
+        ),
+        new SwerveModulePosition(
+          // Calculate meters from drive rotations
+          (driveEncoder[3].getPosition() - initialDriveEncoderValue[3])* (Constants.SWERVEWHEEL_CIRCUMFERANCE * Constants.ENCODER_GEAR_RATIO),
+          // Rotation2d works in radians
+          new Rotation2d(Math.toRadians(turnEncoder[3].getAbsolutePosition()))
+        )
       }
     );
 
-    // Translation2d driveVectorAverage = new Translation2d();
-
-    // double[] velocities = new double[4];
-
-    // // Pair drive encoders with turn encoders
-    // for (int i = 0; i < driveEncoder.length; i++) {
-
-    //   velocities[i] = driveEncoder[i].getVelocity();
-      
-    //   // Calculate vector sum of all drive modules
-    //   driveVectorAverage = driveVectorAverage.plus(
-    //     new Translation2d(
-    //       // Calculate distance difference from last frame
-    //       driveEncoder[i].getPosition() - lastDistance[i], 
-    //       // CANCoder is already configured to account for offset!
-    //       new Rotation2d(Math.toRadians(turnEncoder[i].getPosition())) //+ Constants.MagOffset[i]
-    //     )
-    //   );
-    // }
-
-    // SmartDashboard.putNumber("L1Speed", velocities[0]);
-    // SmartDashboard.putNumber("R1Speed", velocities[1]);
-    // SmartDashboard.putNumber("L2Speed", velocities[2]);
-    // SmartDashboard.putNumber("R2Speed", velocities[3]);
-
-    SmartDashboard.putNumber("L1Direction", turnEncoder[0].getAbsolutePosition());
-    SmartDashboard.putNumber("R1Direction", turnEncoder[1].getAbsolutePosition());
-    SmartDashboard.putNumber("L2Direction", turnEncoder[2].getAbsolutePosition());
-    SmartDashboard.putNumber("R2Direction", turnEncoder[3].getAbsolutePosition());
-
-    // // Divide by 4 for average
-    // driveVectorAverage = driveVectorAverage.div(driveEncoder.length);
+    SmartDashboard.putNumber("L1Direction", Math.toRadians(turnEncoder[0].getAbsolutePosition()));
+    SmartDashboard.putNumber("R1Direction", Math.toRadians(turnEncoder[1].getAbsolutePosition()));
+    SmartDashboard.putNumber("L2Direction", Math.toRadians(turnEncoder[2].getAbsolutePosition()));
+    SmartDashboard.putNumber("R2Direction", Math.toRadians(turnEncoder[3].getAbsolutePosition()));
 
     AHRS gyro = Autonomous.navxGyro;
 
-    //double angleRad = Math.toRadians(gyro.getAngle());
-
     SmartDashboard.putNumber("Gyro", gyro.getAngle());
 
-    // robotPosition = robotPosition.plus(
-    //   driveVectorAverage.rotateBy(
-    //     new Rotation2d(angleRad)
-    //   )
-    // );
+  }
 
-    // // Record last distance for delta calculation
-    // for (int i = 0; i < 4; i ++) {
-    //   lastDistance[i] = driveEncoder[i].getPosition(); 
-    // }
+  public void resetOdometry() {
+    odometry.resetPosition(
+      new Rotation2d(Autonomous.navxGyro.getAngle()), 
+      getZeroPosition(), 
+      new Pose2d(0, 0, new Rotation2d())
+    );
+
+    for (int i = 0; i < initialDriveEncoderValue.length; i++) {
+      initialDriveEncoderValue[i] = driveEncoder[i].getPosition();
+    }
+  }
+
+  public SwerveModulePosition[] getZeroPosition() {
+    return new SwerveModulePosition[] {
+      new SwerveModulePosition(0, new Rotation2d(Math.toRadians(turnEncoder[0].getPosition() - Constants.MagOffset[0]))),
+      new SwerveModulePosition(0, new Rotation2d(Math.toRadians(turnEncoder[1].getPosition() - Constants.MagOffset[1]))),
+      new SwerveModulePosition(0, new Rotation2d(Math.toRadians(turnEncoder[2].getPosition() - Constants.MagOffset[2]))),
+      new SwerveModulePosition(0, new Rotation2d(Math.toRadians(turnEncoder[3].getPosition() - Constants.MagOffset[3])))
+    };
   }
 
   @Override
@@ -134,8 +149,13 @@ public class DriveKinematics extends SubsystemBase {
     // Assume periodic is running at the default period
     updatePosition();
 
-    xPosEntry.setDouble(robotPosition.getX());
-    yPosEntry.setDouble(robotPosition.getY());
+    driveEncoderEntry.setDouble(driveEncoder[0].getPosition() * (Constants.SWERVEWHEEL_CIRCUMFERANCE * Constants.ENCODER_GEAR_RATIO));
+
+    rotation0Entry.setDouble(turnEncoder[0].getAbsolutePosition() % 360);
+    rotation1Entry.setDouble(turnEncoder[1].getAbsolutePosition() % 360);
+
+    xPosEntry.setDouble(odometry.getPoseMeters().getX()); //* 39.37 * 5.267881531);
+    yPosEntry.setDouble(odometry.getPoseMeters().getY()); //* 39.37 * 5.267881531);
 
     // xSpeedEntry.setDouble(Autonomous.navxGyro.getVelocityX());
     // ySpeedEntry.setDouble(Autonomous.navxGyro.getVelocityY());

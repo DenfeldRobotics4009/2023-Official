@@ -8,6 +8,8 @@ import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 
 // glory to felix the helix
@@ -74,7 +76,7 @@ public class RobotContainer {
 
   private final LimelightServer m_limeLight = new LimelightServer();
 
-  private final DriveKinematics m_kinenatics = new DriveKinematics(m_drivetrainSubsystem);
+  private final DriveKinematics m_kinematics = new DriveKinematics(m_drivetrainSubsystem);
   
   private final LED m_led = new LED();
 
@@ -104,7 +106,7 @@ public class RobotContainer {
         ) * Constants.MAX_VELOCITY_METERS_PER_SECOND,
         
         () -> DeadZoneTuner.adjustForDeadzone(
-          m_jsDriver.getZ(), 0.16, false
+          m_jsDriver.getZ(), 0.4, false
         ) * Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
 
         () -> m_jsDriver.getRawButton(9),
@@ -335,21 +337,6 @@ public class RobotContainer {
             new AutoCommand.EventMarkerCommandMode.WhileTrue(), 
             8, 
             8)
-          // Marker 1
-          // ,new AutoCommand.EventMarkerSet(
-          //   m_path.getMarkers().get(0),                                                                                                                                                                                                                      
-          //   new ArmGoto(m_manipulator, () -> Constants.ConePlace2Rot),
-          //   new AutoCommand.EventMarkerCommandMode.OnTrue(),
-          //   2,
-          //   1
-          // ),
-          // new AutoCommand.EventMarkerSet(
-          //   m_path.getMarkers().get(1), 
-          //   new ArmGoto(m_manipulator, () -> 0),
-          //   new AutoCommand.EventMarkerCommandMode.OnTrue(),
-          //   2,
-          //   1
-          // )
         );
 
       case 2:
@@ -376,13 +363,13 @@ public class RobotContainer {
               new OuttakeCone(m_intake), 
               new AutoCommand.EventMarkerCommandMode.OnTrue(), 
               1, 
-              1.5),
+              2),
           
             new AutoCommand.TimerScheduledCommand(
               new StopIntake(m_intake), 
               new AutoCommand.EventMarkerCommandMode.OnTrue(), 
               1, 
-              2.5),
+              3),
 
           new AutoCommand.EventMarkerSet(
             m_path2.getMarkers().get(1), 
