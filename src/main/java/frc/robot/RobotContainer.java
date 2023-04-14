@@ -8,8 +8,6 @@ import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
 import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 
 // glory to felix the helix
@@ -76,7 +74,7 @@ public class RobotContainer {
 
   private final LimelightServer m_limeLight = new LimelightServer();
 
-  private final DriveKinematics m_kinematics = new DriveKinematics(m_drivetrainSubsystem);
+  private final DriveKinematics m_kinenatics = new DriveKinematics(m_drivetrainSubsystem);
   
   private final LED m_led = new LED();
 
@@ -106,7 +104,7 @@ public class RobotContainer {
         ) * Constants.MAX_VELOCITY_METERS_PER_SECOND,
         
         () -> DeadZoneTuner.adjustForDeadzone(
-          m_jsDriver.getZ(), 0.4, false
+          m_jsDriver.getZ(), 0.16, false
         ) * Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
 
         () -> m_jsDriver.getRawButton(9),
@@ -120,7 +118,8 @@ public class RobotContainer {
         m_manipulator, 
         () -> DeadZoneTuner.adjustForDeadzone(m_jsOperator.getRawAxis(2), 0.16, false),
         () -> DeadZoneTuner.adjustForDeadzone(m_jsOperator.getRawAxis(4), 0.05, false),
-        () -> m_jsOperator.getRawAxis(1)
+        () -> m_jsOperator.getRawAxis(1),
+        () -> m_jsOperator.getPOV()
       )
     );
 
@@ -234,6 +233,16 @@ public class RobotContainer {
     JoystickButton o11 = new JoystickButton(m_jsOperator, 11);
     JoystickButton o12 = new JoystickButton(m_jsOperator, 12);
 
+    POVButton opov0 = new POVButton(m_jsOperator, 0);
+    POVButton opov45 = new POVButton(m_jsOperator, 45);
+    POVButton opov90 = new POVButton(m_jsOperator, 90);
+    POVButton opov135 = new POVButton(m_jsOperator, 135);
+    POVButton opov180 = new POVButton(m_jsOperator, 180);
+    POVButton opov225 = new POVButton(m_jsOperator, 225);
+    POVButton opov270 = new POVButton(m_jsOperator, 270);
+    POVButton opov315 = new POVButton(m_jsOperator, 315);
+    
+
     /**
      * .and(o1.negate()) Makes the command require the trigger to not be
      * pressed to function. Thus, the trigger can act as a function key
@@ -244,7 +253,8 @@ public class RobotContainer {
         m_manipulator, 
         () -> m_jsOperator.getRawAxis(2),
         () -> m_jsOperator.getRawAxis(4),
-        () -> m_jsOperator.getRawAxis(1)
+        () -> m_jsOperator.getRawAxis(1),
+        () -> m_jsOperator.getPOV()
       )
     );
 
@@ -337,6 +347,21 @@ public class RobotContainer {
             new AutoCommand.EventMarkerCommandMode.WhileTrue(), 
             8, 
             8)
+          // Marker 1
+          // ,new AutoCommand.EventMarkerSet(
+          //   m_path.getMarkers().get(0),                                                                                                                                                                                                                      
+          //   new ArmGoto(m_manipulator, () -> Constants.ConePlace2Rot),
+          //   new AutoCommand.EventMarkerCommandMode.OnTrue(),
+          //   2,
+          //   1
+          // ),
+          // new AutoCommand.EventMarkerSet(
+          //   m_path.getMarkers().get(1), 
+          //   new ArmGoto(m_manipulator, () -> 0),
+          //   new AutoCommand.EventMarkerCommandMode.OnTrue(),
+          //   2,
+          //   1
+          // )
         );
 
       case 2:
@@ -363,13 +388,13 @@ public class RobotContainer {
               new OuttakeCone(m_intake), 
               new AutoCommand.EventMarkerCommandMode.OnTrue(), 
               1, 
-              2),
+              1.5),
           
             new AutoCommand.TimerScheduledCommand(
               new StopIntake(m_intake), 
               new AutoCommand.EventMarkerCommandMode.OnTrue(), 
               1, 
-              3),
+              2.5),
 
           new AutoCommand.EventMarkerSet(
             m_path2.getMarkers().get(1), 

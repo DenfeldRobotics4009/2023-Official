@@ -5,24 +5,29 @@
 package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.libraries.DeadZoneTuner;
 import frc.robot.subsystems.Arm;
 
 public class BypassOperate extends CommandBase {
   Arm m_manipulator;
-  DoubleSupplier m_arm, m_winch, m_wrist;
+  DoubleSupplier m_arm, m_winch, m_wrist, m_pov;
   /** Creates a new DefaultPitch. */
   public BypassOperate(
     Arm manipulator,
 
     DoubleSupplier arm,
     DoubleSupplier winch,
-    DoubleSupplier wrist
+    DoubleSupplier wrist,
+
+    DoubleSupplier pov
   ) {
     m_arm = arm;
     m_winch = winch;
     m_wrist = wrist;
+    m_pov = pov;
 
     m_manipulator = manipulator;
     addRequirements(manipulator);
@@ -40,6 +45,21 @@ public class BypassOperate extends CommandBase {
       m_winch.getAsDouble() * 0.2,
       m_wrist.getAsDouble() * 0.08,
       true
+    );
+
+    SmartDashboard.putNumber("AAAAPOV", m_pov.getAsDouble());
+    
+    double armSpeed = 0;
+    if (m_pov.getAsDouble() != -1) {
+      if (m_pov.getAsDouble() == 0) { // Nested if statements dont judge me please this is bad
+        armSpeed = 0.1;
+      } else if (m_pov.getAsDouble() == 180) {
+        armSpeed = -0.1;
+      }
+    }
+
+    m_manipulator.drive(
+      -armSpeed * 0.4, 0, 0, true
     );
   }
 
