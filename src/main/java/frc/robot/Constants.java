@@ -90,10 +90,10 @@ public final class Constants {
 
     public static final int PneumaticHubID = 60;
 
-    public static final double L1SMagnetOffset = -10;
+    public static final double L1SMagnetOffset = -5;
     public static final double R1SMagnetOffset = -115;
-    public static final double L2SMagnetOffset = 108;
-    public static final double R2SMagnetOffset = -50;
+    public static final double L2SMagnetOffset = 110;
+    public static final double R2SMagnetOffset = -67;
 
     public static final int JointM_ = 0;
 

@@ -104,7 +104,7 @@ public class RobotContainer {
         ) * Constants.MAX_VELOCITY_METERS_PER_SECOND,
         
         () -> DeadZoneTuner.adjustForDeadzone(
-          m_jsDriver.getZ(), 0.16, false
+          m_jsDriver.getZ(), 0.2, false
         ) * Constants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
 
         () -> m_jsDriver.getRawButton(9),

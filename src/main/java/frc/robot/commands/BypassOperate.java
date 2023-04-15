@@ -46,8 +46,6 @@ public class BypassOperate extends CommandBase {
       m_wrist.getAsDouble() * 0.08,
       true
     );
-
-    SmartDashboard.putNumber("AAAAPOV", m_pov.getAsDouble());
     
     double armSpeed = 0;
     if (m_pov.getAsDouble() != -1) {
