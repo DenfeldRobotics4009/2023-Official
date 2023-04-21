@@ -86,7 +86,7 @@ public class Drivetrain extends SubsystemBase {
       a_mCANTencoder[i].configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
       a_mCANTencoder[i].configSensorDirection(true);
       a_dpid[i].setTolerance(20); // (RPM) arbitrary!!! #FIXME
-      a_pid[i].setTolerance(6); // (Degreees)
+      a_pid[i].setTolerance(0); // (Degreees)
       a_pid[i].setTarget(0);
 
       a_mctrlr[i].setOpenLoopRampRate(0.25);

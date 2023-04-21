@@ -74,7 +74,7 @@ public class RobotContainer {
 
   private final LimelightServer m_limeLight = new LimelightServer();
 
-  private final DriveKinematics m_kinenatics = new DriveKinematics(m_drivetrainSubsystem);
+  //private final DriveKinematics m_kinenatics = new DriveKinematics(m_drivetrainSubsystem);
   
   private final LED m_led = new LED();
 
@@ -262,6 +262,7 @@ public class RobotContainer {
 
     o5.and(o2.negate()).whileTrue(new WristGoto(m_manipulator, () -> Constants.WristCubeIntakeRot));
     o6.and(o2.negate()).whileTrue(new WristGoto(m_manipulator, () -> Constants.WristConeFlipRot));
+    o10.and(o2.negate()).whileTrue(new WristGoto(m_manipulator, () -> -10));
     o7.and(o2.negate()).whileTrue(new WristGoto(m_manipulator, () -> -1));
 
     o9.onTrue(new SequentialCommandGroup(
@@ -292,6 +293,7 @@ public class RobotContainer {
 
     o1.and(o4).whileTrue(new IntakeCone(m_intake));
     o3.and(o4).whileTrue(new OuttakeCone(m_intake));
+
   }
 
   /**

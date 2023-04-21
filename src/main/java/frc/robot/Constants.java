@@ -91,9 +91,9 @@ public final class Constants {
     public static final int PneumaticHubID = 60;
 
     public static final double L1SMagnetOffset = -5;
-    public static final double R1SMagnetOffset = -115;
-    public static final double L2SMagnetOffset = 110;
-    public static final double R2SMagnetOffset = -67;
+    public static final double R1SMagnetOffset = -120;
+    public static final double L2SMagnetOffset = 109.5;
+    public static final double R2SMagnetOffset = -59;
 
     public static final int JointM_ = 0;
 
@@ -107,7 +107,7 @@ public final class Constants {
     public static final int IntakeID = 50; 
 
     public static final double ArmMaximumLengthRot = 114;
-    public static final double ArmMaximumHightRot = -82; // Use in min
+    public static final double ArmMaximumHightRot = -90; // Use in min
     public static final double WristMaximumAngleRot = -60; // use in min
 
     public static final double WristLoadingStationIntake = -50.5;

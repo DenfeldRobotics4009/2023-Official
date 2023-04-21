@@ -16,7 +16,7 @@ public class Intake extends SubsystemBase {
   public Intake() {}
 
   public void intake(double speed) {
-    m_intake.set(ControlMode.PercentOutput, speed);
+    m_intake.set(ControlMode.PercentOutput, -speed);
   }
 
   @Override
